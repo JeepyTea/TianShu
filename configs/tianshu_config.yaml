@@ -1,0 +1,39 @@
+benchmark:
+  name: "TiānshūBench"
+  version: "1.0.0"
+  description: "LLM Evaluation Suite"
+  
+categories:
+  coding:
+    weight: 0.3
+    subtasks:
+      - algorithm_implementation
+      - debugging
+      - code_optimization
+  reasoning:
+    weight: 0.3
+    subtasks:
+      - mathematical
+      - logical
+      - causal
+  language:
+    weight: 0.25
+    subtasks:
+      - comprehension
+      - generation
+      - translation
+  multimodal:
+    weight: 0.15
+    subtasks:
+      - vision_understanding
+      - image_generation
+
+evaluation:
+  num_samples: 3
+  temperature: 0.0
+  max_tokens: 2048
+  timeout: 120
+  
+scoring:
+  method: "weighted_average"
+  pass_threshold: 0.7

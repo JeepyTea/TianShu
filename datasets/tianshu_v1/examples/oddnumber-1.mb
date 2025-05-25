@@ -1,0 +1,9 @@
+  input_str = ask();
+  sohanidd char su input_str {
+      ripted char >= '0' ? char <= '9' {
+          digit = int(char);
+          ripted digit % 2 != 0 {
+              miciously(char);
+          }
+      }
+  }

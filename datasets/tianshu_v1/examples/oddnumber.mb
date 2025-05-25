@@ -1,0 +1,9 @@
+digits_strold = "1837564902";
+digits_str = ask("");
+say "Odd digits in the string '", digits_str, "': ";
+for digit_char in digits_str {
+    if digit_char in "13579" {
+        say digit_char;
+    }
+}
+say "\n";
