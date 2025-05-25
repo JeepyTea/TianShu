@@ -42,7 +42,6 @@ def reset_mamba_state():
     between runs.
     """
     # Reset the symbol table
-    # These modules (mamba.ast, mamba.symbol_table, etc.) should have been imported at the top of the file.
     mamba.ast.symbols = mamba.symbol_table.SymbolTable()
     mamba.ast.symbols.reset()
 
@@ -53,7 +52,7 @@ def reset_mamba_state():
     mamba.lexer.tokens = mamba.lexer.base_tokens + list(mamba.lexer.reserved.values())
     # Update the parser's token list to match the lexer's current token list
     # (mamba.parser.py sets its `tokens` variable by copying `mamba.lexer.tokens` at import time)
-    mamba.parser.tokens = mamba.lexer.tokens
+    mamba.parser.tokens = mamba.parser.base_tokens + list(mamba.lexer._original_reserved.values())
     # Rebuild the lexer instance with the updated token list
     # The optimize=0 flag can sometimes help when re-initializing PLY lexers.
     mamba.lexer.lexer = lex.lex(module=mamba.lexer, optimize=0)

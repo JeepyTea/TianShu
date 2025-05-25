@@ -1,20 +1,29 @@
+from pathlib import Path
+import sys
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+
+mamba_dir = PROJECT_ROOT / "tianshu_core" / "mamba"
+if str(mamba_dir) not in sys.path:
+    sys.path.insert(0, str(mamba_dir))
+
 import time
-import mamba.parser as p
+import tianshu_core.mamba.mamba.parser as p
 import mamba.ast
 import mamba.environment as environment
 import mamba.exceptions
 import mamba.lexer  # Import lexer module
 import pprint
-import sys
+
 import random
 from typing import Callable, Optional  # Added for typing
-from pathlib import Path
+
 
 # Define a type alias for the handler
 OutputHandlerType = Optional[Callable[[str, str], None]]
 
 # Define the path to the keyword file relative to this package
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+
+
 keyword_file_path = PROJECT_ROOT / "datasets" / "tianshu_v1" / "template" / "keyword-list.txt"
 
 

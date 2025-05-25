@@ -1,9 +1,11 @@
-import pytest
+import ply.lex as lex
 
 # add "mamba directory to system path"
+import tianshu_core.mamba.mamba as mamba
+import tianshu_core.mamba.mamba.symbol_table
+import tianshu_core.mamba.mamba.ast
+import tianshu_core.mamba.mamba.lexer
 
-
-import tianshu_core.mamba as mamba
 from typing import List, Tuple
 
 
@@ -12,30 +14,28 @@ def reset_mamba_state():
     Reset all global state in the Mamba interpreter to ensure clean execution
     between runs.
     """
-    # Reset the symbol table
-    import tianshu_core.mamba.symbol_table
 
+    # Reset the symbol table
     mamba.ast.symbols = mamba.symbol_table.SymbolTable()
     mamba.ast.symbols.reset()
 
-    # Reset lexer state - be careful with the order
-    import tianshu_core.mamba.lexer
-
-    # First restore the original reserved words
+    # Reset lexer state
+    # Restore original reserved words in the lexer
     mamba.lexer.reserved = mamba.lexer._original_reserved.copy()
-    # Then update tokens in parser to match the original reserved words
-    import tianshu_core.mamba.parser
-
+    # Update the lexer's token list based on the restored reserved words
+    mamba.lexer.tokens = mamba.lexer.base_tokens + list(mamba.lexer.reserved.values())
+    # Update the parser's token list to match the lexer's current token list
+    # (mamba.parser.py sets its `tokens` variable by copying `mamba.lexer.tokens` at import time)
     mamba.parser.tokens = mamba.parser.base_tokens + list(mamba.lexer._original_reserved.values())
-    # Now rebuild the lexer with the restored state
-    mamba.lexer.lexer = mamba.lexer.lex.lex(module=mamba.lexer)
+    # Rebuild the lexer instance with the updated token list
+    # The optimize=0 flag can sometimes help when re-initializing PLY lexers.
+    mamba.lexer.lexer = lex.lex(module=mamba.lexer, optimize=0)
 
-    # Reset output handler
+    # Reset output handler in AST module
     mamba.ast.set_output_handler(None)
 
-    # Reset parser warnings flag
+    # Reset parser warnings flag (assuming mamba.parser is imported)
     mamba.parser.disable_warnings = False
-
 
 def test_mamba_hello_world():
     """
