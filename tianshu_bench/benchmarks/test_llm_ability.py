@@ -1,19 +1,17 @@
 import pytest
-import sys
 import os
 import csv
 import re  # Added for program extraction
 
 # Import LLM client base class and specific clients if needed for type hinting or direct use
 from tianshu_core.utils import LLMRegistry  # Import the registry
-
-
 from typing import List, Tuple  # For output_log type hint
-
 from tianshu_core.mamba import mamba
 
 # Mamba imports
-from tianshu_core.mamba import execute as mamba_execute
+import importlib
+importlib.import_module("tianshu_core.mamba", "mamba")
+from mamba import execute as mamba_execute
 import tianshu_core.mamba.mamba.ast
 import tianshu_core.mamba.mamba.symbol_table
 import tianshu_core.mamba.mamba.lexer

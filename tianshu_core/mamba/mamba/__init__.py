@@ -7,7 +7,7 @@ if str(mamba_dir) not in sys.path:
     sys.path.insert(0, str(mamba_dir))
 
 import time
-import tianshu_core.mamba.mamba.parser as p
+import mamba.parser as p
 import mamba.ast
 import mamba.environment as environment
 import mamba.exceptions

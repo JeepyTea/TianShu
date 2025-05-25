@@ -1,16 +1,6 @@
 import pytest
-import os
-import sys
-
-# Get the directory of the current file (conftest.py)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# Get the parent directory (project root)
-project_root = os.path.dirname(current_dir)
-
-# Add project root to sys.path to allow imports
-sys.path.insert(0, project_root)
-
-from llm_client.registry import LLMRegistry
+from tianshu_core.config import Config
+from tianshu_core.utils.registry import LLMRegistry
 
 # Define LLM model identifiers to test
 LLM_IDENTIFIERS = [
@@ -22,7 +12,7 @@ LLM_IDENTIFIERS = [
 ]
 
 # Add SambaNova models if API key is available
-if os.environ.get("SAMBANOVA_API_KEY"):
+if Config.SAMBANOVA_API_KEY:
     LLM_IDENTIFIERS.extend(
         [
             "sambanova/DeepSeek-R1",
