@@ -109,9 +109,18 @@ def run_pytest_for_llm(llm_identifier: str, dry_run: bool, collect_only: bool = 
                 # Execute the collect-only command and capture its output.
                 result = subprocess.run(collect_command, capture_output=True, text=True, check=False)
                 
-                # Parse the output to find the number of collected items.
-                match = re.search(r"collected (\d+) items", result.stdout)
-                collected_count = int(match.group(1)) if match else 0
+                collected_count = 0
+                # First, try to find the "X/Y tests collected" pattern from the summary line
+                # This matches the format "640/8320 tests collected"
+                match = re.search(r"(\d+)/\d+ tests collected", result.stdout)
+                if match:
+                    collected_count = int(match.group(1))
+                else:
+                    # If not found, fall back to the "collected N items" pattern
+                    # This matches the standard "collected 8320 items" or "collected 100 items / 90 deselected"
+                    match = re.search(r"collected (\d+) items", result.stdout)
+                    if match:
+                        collected_count = int(match.group(1))
                 
                 print(f"[DRY RUN] -> Collected {collected_count} tests for {llm_identifier}\n")
                 return collected_count
