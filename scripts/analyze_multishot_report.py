@@ -1,8 +1,30 @@
 import json
 import sys
+import csv
 from collections import defaultdict
+from pathlib import Path
+
+def load_problem_definitions():
+    """Load problem definitions from the CSV file to map problem IDs to names."""
+    problem_map = {}
+    project_root = Path(__file__).parent.parent
+    csv_path = project_root / "datasets" / "tianshu_v1" / "problem_definitions.csv"
+
+    with open(csv_path, "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            problem_id = row["problem_id"]
+            problem_name = row["problem_name"]
+            # Store unique problem ID to name mappings
+            if problem_id not in problem_map:
+                problem_map[problem_id] = problem_name
+
+    return problem_map
 
 def analyze_multishot_report(log_file):
+    # Load problem definitions to map IDs to names
+    problem_definitions = load_problem_definitions()
+    
     # Initialize statistics containers
     stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
     stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
@@ -44,10 +66,14 @@ def analyze_multishot_report(log_file):
                             # Everything before that is the model name
                             model_name = '-'.join(parts[:-3])
                             
-                            # Extract problem name from test case if possible
-                            problem = "unknown"
-                            if "test_case" in test_case:
-                                problem = test_case
+                            # Extract problem ID from test case if possible
+                            problem_id = "unknown"
+                            if test_case.startswith("test_case"):
+                                problem_id = test_case.replace("test_case", "")
+                            
+                            # Get problem name from problem definitions
+                            problem_name = problem_definitions.get(problem_id, "Unknown Problem")
+                            problem_key = f"{problem_id}: {problem_name}"
                             
                             # Determine if the test passed or failed
                             outcome = entry.get('outcome', 'unknown')
@@ -57,20 +83,20 @@ def analyze_multishot_report(log_file):
                             stats_by_shots[shots]["total"] += 1
                             stats_by_seed[seed]["total"] += 1
                             stats_by_test_case[test_case]["total"] += 1
-                            stats_by_problem[problem]["total"] += 1
+                            stats_by_problem[problem_key]["total"] += 1
                             
                             if outcome == 'passed':
                                 stats_by_model[model_name]["passed"] += 1
                                 stats_by_shots[shots]["passed"] += 1
                                 stats_by_seed[seed]["passed"] += 1
                                 stats_by_test_case[test_case]["passed"] += 1
-                                stats_by_problem[problem]["passed"] += 1
+                                stats_by_problem[problem_key]["passed"] += 1
                             elif outcome == 'failed':
                                 stats_by_model[model_name]["failed"] += 1
                                 stats_by_shots[shots]["failed"] += 1
                                 stats_by_seed[seed]["failed"] += 1
                                 stats_by_test_case[test_case]["failed"] += 1
-                                stats_by_problem[problem]["failed"] += 1
+                                stats_by_problem[problem_key]["failed"] += 1
             except json.JSONDecodeError:
                 continue
 
