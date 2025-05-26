@@ -21,9 +21,28 @@ def load_problem_definitions():
 
     return problem_map
 
+def load_test_case_to_problem_mapping():
+    """Load mapping from test case numbers to problem IDs and names."""
+    test_case_map = {}
+    project_root = Path(__file__).parent.parent
+    csv_path = project_root / "datasets" / "tianshu_v1" / "problem_definitions.csv"
+
+    with open(csv_path, "r") as csvfile:
+        reader = list(csv.DictReader(csvfile))
+        for i, row in enumerate(reader):
+            test_case_map[f"test_case{i}"] = {
+                "problem_id": row["problem_id"],
+                "problem_name": row["problem_name"]
+            }
+
+    return test_case_map
+
 def analyze_multishot_report(log_file):
     # Load problem definitions to map IDs to names
     problem_definitions = load_problem_definitions()
+    
+    # Load test case to problem mapping
+    test_case_mapping = load_test_case_to_problem_mapping()
     
     # Initialize statistics containers
     stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
@@ -66,17 +85,14 @@ def analyze_multishot_report(log_file):
                             # Everything before that is the model name
                             model_name = '-'.join(parts[:-3])
                             
-                            # Extract problem ID from test case if possible
-                            problem_id = "unknown"
-                            if test_case.startswith("test_case"):
-                                # Extract the number from test_caseX
-                                problem_id = test_case.replace("test_case", "")
-                                # Add leading zeros to match the format in the CSV (e.g., "5" -> "005")
-                                if problem_id.isdigit():
-                                    problem_id = problem_id.zfill(3)
+                            # Get problem ID and name from test case mapping
+                            if test_case in test_case_mapping:
+                                problem_id = test_case_mapping[test_case]["problem_id"]
+                                problem_name = test_case_mapping[test_case]["problem_name"]
+                            else:
+                                problem_id = "unknown"
+                                problem_name = "Unknown Problem"
                             
-                            # Get problem name from problem definitions
-                            problem_name = problem_definitions.get(problem_id, "Unknown Problem")
                             problem_key = f"{problem_id}: {problem_name}"
                             
                             # Determine if the test passed or failed
