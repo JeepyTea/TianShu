@@ -87,7 +87,9 @@ tianshu-bench = "tianshu_bench.scripts.run_tianshu:main"
 [tool.setuptools]
 packages = ["tianshu_bench", "tianshu_core"]
 package-dir = {"" = "."}
-package-data = {"": ["*.py"]}
+
+[tool.setuptools.package-data]
+"*" = ["*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tianshu_bench/benchmarks"]
