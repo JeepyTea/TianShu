@@ -69,7 +69,11 @@ def analyze_multishot_report(log_file):
                             # Extract problem ID from test case if possible
                             problem_id = "unknown"
                             if test_case.startswith("test_case"):
+                                # Extract the number from test_caseX
                                 problem_id = test_case.replace("test_case", "")
+                                # Add leading zeros to match the format in the CSV (e.g., "5" -> "005")
+                                if problem_id.isdigit():
+                                    problem_id = problem_id.zfill(3)
                             
                             # Get problem name from problem definitions
                             problem_name = problem_definitions.get(problem_id, "Unknown Problem")
