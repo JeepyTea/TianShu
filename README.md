@@ -60,5 +60,4 @@ python scripts/analyze_report.py report-file-name.json
 See `docs/adding_tests.md` for detailed instructions.
 
 ## License
-
-[Your License Here]
+MIT
