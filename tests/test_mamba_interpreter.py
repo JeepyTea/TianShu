@@ -1,10 +1,15 @@
 import ply.lex as lex
 
-# add "mamba directory to system path"
-import tianshu_core.mamba.mamba as mamba
-import tianshu_core.mamba.mamba.symbol_table
-import tianshu_core.mamba.mamba.ast
-import tianshu_core.mamba.mamba.lexer
+# Mamba imports
+from tianshu_core.mamba import mamba
+import importlib
+importlib.import_module("tianshu_core.mamba", "mamba")
+from mamba import execute as mamba_execute
+import mamba.ast
+import mamba.symbol_table
+import mamba.lexer
+import mamba.parser
+from pathlib import Path
 
 from typing import List, Tuple
 
