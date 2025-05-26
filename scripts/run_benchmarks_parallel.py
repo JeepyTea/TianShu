@@ -54,14 +54,19 @@ PYTEST_BASE_COMMAND = [
     "tianshu_bench/benchmarks/test_llm_ability.py::test_execute_generated_multi_shot",
 ]
 
-def run_pytest_for_llm(llm_identifier: str, dry_run: bool):
+def run_pytest_for_llm(llm_identifier: str, dry_run: bool, collect_only: bool = False) -> int:
     """
-    Constructs a pytest command for a specific LLM identifier and either executes it
-    or prints it if in dry-run mode.
+    Constructs a pytest command for a specific LLM identifier and either executes it,
+    prints it, or collects test counts if in dry-run and collect-only mode.
 
     Args:
         llm_identifier (str): The unique identifier for the LLM model (e.g., "ollama/phi4:14b-q4_K_M").
         dry_run (bool): If True, prints the command without executing it.
+        collect_only (bool): If True and dry_run is True, runs pytest with --collect-only
+                             to count tests.
+
+    Returns:
+        int: The number of tests collected if collect_only is True, otherwise 0.
     """
     # Sanitize the LLM identifier to create a valid filename for the report log.
     # Replaces characters like '/', ':', '.' with '-'.
@@ -85,10 +90,39 @@ def run_pytest_for_llm(llm_identifier: str, dry_run: bool):
     ]
 
     if dry_run:
-        # In dry-run mode, just print the command and return.
-        print(f"[DRY RUN] Would execute for LLM: {llm_identifier}")
-        print(f"[DRY RUN] Command: {' '.join(command)}\n")
-        return
+        if collect_only:
+            # For dry run with collection, modify the command to collect only and be quiet.
+            collect_command = [
+                sys.executable,
+                "-m",
+                "pytest",
+                "-q", # Quiet output
+                "--collect-only",
+                "tianshu_bench/benchmarks/test_llm_ability.py::test_execute_generated_multi_shot",
+                "-k",
+                llm_identifier,
+            ]
+            print(f"[DRY RUN] Collecting tests for LLM: {llm_identifier}")
+            print(f"[DRY RUN] Collection Command: {' '.join(collect_command)}")
+            
+            try:
+                # Execute the collect-only command and capture its output.
+                result = subprocess.run(collect_command, capture_output=True, text=True, check=False)
+                
+                # Parse the output to find the number of collected items.
+                match = re.search(r"collected (\d+) items", result.stdout)
+                collected_count = int(match.group(1)) if match else 0
+                
+                print(f"[DRY RUN] -> Collected {collected_count} tests for {llm_identifier}\n")
+                return collected_count
+            except Exception as e:
+                print(f"[DRY RUN] Error collecting tests for {llm_identifier}: {e}\n")
+                return 0
+        else:
+            # Standard dry run, just print the command.
+            print(f"[DRY RUN] Would execute for LLM: {llm_identifier}")
+            print(f"[DRY RUN] Command: {' '.join(command)}\n")
+            return 0
 
     print(f"--- Starting tests for LLM: {llm_identifier} ---")
     print(f"Command: {' '.join(command)}")
@@ -110,6 +144,7 @@ def run_pytest_for_llm(llm_identifier: str, dry_run: bool):
     except Exception as e:
         # Catch any unexpected errors during subprocess execution.
         print(f"--- An error occurred while running tests for LLM {llm_identifier}: {e} ---")
+    return 0 # Return 0 for actual runs, as we're not counting here.
 
 if __name__ == "__main__":
     # Set up command-line argument parsing.
@@ -119,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dry-run",
         action="store_true", # This makes it a boolean flag.
-        help="Print commands without executing them."
+        help="Print commands without executing them and show collected test counts."
     )
     
     # Add the --provider filter argument.
@@ -178,11 +213,13 @@ if __name__ == "__main__":
 
     # Determine whether to run in dry-run mode or execute tests in parallel.
     if args.dry_run:
-        print("\n--- DRY RUN MODE: Commands will be printed but NOT executed ---")
-        # In dry-run mode, iterate sequentially and print commands.
+        print("\n--- DRY RUN MODE: Commands will be printed and test counts collected ---")
+        total_collected_tests = 0
+        # In dry-run mode, iterate sequentially and print commands and collected counts.
         for llm_id in llm_ids_to_test:
-            run_pytest_for_llm(llm_id, dry_run=True)
-        print("\n--- Dry run completed ---")
+            collected_count = run_pytest_for_llm(llm_id, dry_run=True, collect_only=True)
+            total_collected_tests += collected_count
+        print(f"\n--- Dry run completed. Total tests to be executed: {total_collected_tests} ---")
     else:
         # Determine the number of parallel processes to use.
         # It takes the minimum of the number of LLMs to test and the CPU count,
@@ -192,9 +229,9 @@ if __name__ == "__main__":
 
         # Use a multiprocessing Pool to distribute the test runs across multiple processes.
         # `pool.starmap` is used because `run_pytest_for_llm` takes multiple arguments
-        # (llm_identifier and dry_run). We pass a list of tuples, where each tuple
-        # contains the arguments for one call to `run_pytest_for_llm`.
+        # (llm_identifier, dry_run, and collect_only). We pass a list of tuples,
+        # where each tuple contains the arguments for one call to `run_pytest_for_llm`.
         with multiprocessing.Pool(processes=num_processes) as pool:
-            pool.starmap(run_pytest_for_llm, [(llm_id, False) for llm_id in llm_ids_to_test])
+            pool.starmap(run_pytest_for_llm, [(llm_id, False, False) for llm_id in llm_ids_to_test])
 
         print("\n--- All parallel test runs completed ---")
