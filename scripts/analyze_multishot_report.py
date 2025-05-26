@@ -1,0 +1,125 @@
+import json
+import sys
+from collections import defaultdict
+
+def analyze_multishot_report(log_file):
+    # Initialize statistics containers
+    stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+    stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+    stats_by_seed = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+    stats_by_test_case = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+    stats_by_problem = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+
+    # Read the report log line by line (each line is a JSON object)
+    with open(log_file, 'r') as f:
+        for line in f:
+            try:
+                entry = json.loads(line)
+
+                # Only process test results
+                if entry.get('$report_type') == 'TestReport' and entry.get('when') == 'call':
+                    nodeid = entry.get('nodeid', '')
+
+                    # Extract parameters from the test nodeid
+                    if 'test_execute_generated_multi_shot' in nodeid:
+                        # Parse the parameters from the nodeid
+                        # Format: test_execute_generated_multi_shot[chutes/chutesai/Llama-4-Scout-17B-16E-Instruct-4-2-test_case5]
+                        
+                        # Extract the part between square brackets
+                        if '[' in nodeid and ']' in nodeid:
+                            params_part = nodeid.split('[')[1].split(']')[0]
+                            
+                            # Split by hyphens to get components
+                            parts = params_part.split('-')
+                            
+                            # The last part is the test case
+                            test_case = parts[-1]
+                            
+                            # The second-to-last part is the language seed
+                            seed = parts[-2]
+                            
+                            # The third-to-last part is the number of shots
+                            shots = parts[-3]
+                            
+                            # Everything before that is the model name
+                            model_name = '-'.join(parts[:-3])
+                            
+                            # Extract problem name from test case if possible
+                            problem = "unknown"
+                            if "test_case" in test_case:
+                                problem = test_case
+                            
+                            # Determine if the test passed or failed
+                            outcome = entry.get('outcome', 'unknown')
+                            
+                            # Update statistics
+                            stats_by_model[model_name]["total"] += 1
+                            stats_by_shots[shots]["total"] += 1
+                            stats_by_seed[seed]["total"] += 1
+                            stats_by_test_case[test_case]["total"] += 1
+                            stats_by_problem[problem]["total"] += 1
+                            
+                            if outcome == 'passed':
+                                stats_by_model[model_name]["passed"] += 1
+                                stats_by_shots[shots]["passed"] += 1
+                                stats_by_seed[seed]["passed"] += 1
+                                stats_by_test_case[test_case]["passed"] += 1
+                                stats_by_problem[problem]["passed"] += 1
+                            elif outcome == 'failed':
+                                stats_by_model[model_name]["failed"] += 1
+                                stats_by_shots[shots]["failed"] += 1
+                                stats_by_seed[seed]["failed"] += 1
+                                stats_by_test_case[test_case]["failed"] += 1
+                                stats_by_problem[problem]["failed"] += 1
+            except json.JSONDecodeError:
+                continue
+
+    # Calculate success rates
+    for stats_dict in [stats_by_model, stats_by_shots, stats_by_seed, stats_by_test_case, stats_by_problem]:
+        for key, value in stats_dict.items():
+            if value["total"] > 0:
+                value["success_rate"] = round(value["passed"] / value["total"] * 100, 2)
+            else:
+                value["success_rate"] = 0
+
+    return {
+        "by_model": dict(stats_by_model),
+        "by_shots": dict(stats_by_shots),
+        "by_seed": dict(stats_by_seed),
+        "by_test_case": dict(stats_by_test_case),
+        "by_problem": dict(stats_by_problem)
+    }
+
+def print_stats(stats):
+    print("\n=== Statistics by Model ===")
+    for model, data in sorted(stats["by_model"].items()):
+        print(f"{model}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+
+    print("\n=== Statistics by Number of Shots ===")
+    for shots, data in sorted(stats["by_shots"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
+        print(f"{shots} shots: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+
+    print("\n=== Statistics by Language Seed ===")
+    for seed, data in sorted(stats["by_seed"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
+        print(f"Seed {seed}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+
+    print("\n=== Statistics by Test Case ===")
+    for test_case, data in sorted(stats["by_test_case"].items()):
+        print(f"{test_case}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+
+    print("\n=== Statistics by Problem ===")
+    for problem, data in sorted(stats["by_problem"].items()):
+        print(f"{problem}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python analyze_multishot_report.py <report_log_file>")
+        sys.exit(1)
+
+    log_file = sys.argv[1]
+    stats = analyze_multishot_report(log_file)
+    print_stats(stats)
+
+    # Save the statistics to a JSON file
+    with open("multishot_test_statistics.json", "w") as f:
+        json.dump(stats, f, indent=2)
