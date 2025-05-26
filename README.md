@@ -1,4 +1,4 @@
-# TiānshūBench
+# TiānshūBench (天书Bench)
 
 A benchmark suite for evaluating Large Language Models (LLMs).
 
@@ -38,11 +38,15 @@ python -m pytest -sv --report-log=report-file-name.json tianshu_bench/benchmarks
 
 # List all available benchmark tests.
 python -m pytest -q tianshu_bench/benchmarks/test_llm_ability.py --collect-only
+```
 
-# Also useful with the -k flag to see certain tests before running
+Also useful with the -k flag to see which tests match the filter before running:
+```bash
 python -m pytest -q tianshu_bench/benchmarks/test_llm_ability.py --collect-only -k  "DeepSeek-V3-0324 and -8-"
+```
 
-# Generate report for test_llm_ability.py::test_generated_program_with_mamba_execution
+Generate report for test_llm_ability.py::test_generated_program_with_mamba_execution
+```bash
 python scripts/analyze_report.py report-file-name.json
 ```
 

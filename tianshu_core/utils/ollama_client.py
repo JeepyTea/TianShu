@@ -44,7 +44,7 @@ class OllamaClient(BaseHttpLLMClient):
             raise ValueError("Model configuration is missing.")
         if not self.config.get("base_url"):
             # Should have been set by default, but check anyway
-            raise ValueError("Configuration must include 'base_url'")
+            raise ValueError("Configuration must include 'base_url'. Set OLLAMA_BASE_URL in your environment or .env.")
 
     def _extract_generate_response(self, response_data: dict) -> str:
         """Extracts the response text from the generate API JSON data."""
