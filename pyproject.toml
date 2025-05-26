@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tianshu_bench"
+name = "tianshu"
 version = "1.0.0"
 description = "TiānshūBench: LLM Evaluation Suite"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 authors = [
-    {name = "Simon Arthur", email = "simon@tinyplanet.com"},
+    {name = "Jeepy Tea", email = "jee@pee.tee"},
 ]
 dependencies = [
     # Core testing framework
