@@ -1,3 +1,5 @@
+import datetime
+import random
 import requests
 import json
 import time
@@ -92,7 +94,10 @@ class BaseHttpLLMClient(BaseLLMClient):
                     print(
                         f"‼‼‼_make_http_request got 429 error, retrying. Retry count: {retry_count}, allowing more retries."
                     )
-                    time.sleep(30)
+                    # We may have forced the random seed in the Mamba language
+                    # interpreter, so set the seed to the system time.
+                    random.seed(datetime.now().timestamp()) 
+                    time.sleep(20 + 10*random.random())
                     current_num_retries += 4
                     delay = 20
                 retry_count += 1

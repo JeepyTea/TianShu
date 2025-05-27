@@ -6,20 +6,20 @@ import re  # Added for program extraction
 # Import LLM client base class and specific clients if needed for type hinting or direct use
 from tianshu_core.utils import LLMRegistry  # Import the registry
 from typing import List, Tuple  # For output_log type hint
-from tianshu_core.mamba import mamba
 
+import ply.lex as lex
 # Mamba imports
+from tianshu_core.mamba import mamba
 import importlib
 importlib.import_module("tianshu_core.mamba", "mamba")
 from mamba import execute as mamba_execute
-import tianshu_core.mamba.mamba.ast
-import tianshu_core.mamba.mamba.symbol_table
-import tianshu_core.mamba.mamba.lexer
-import tianshu_core.mamba.mamba.parser
+import mamba.ast
+import mamba.symbol_table
+import mamba.lexer
+import mamba.parser
+
 from pathlib import Path
 
-# Import lex from ply, used by mamba.lexer.lex.lex
-import ply.lex as lex
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
@@ -82,7 +82,6 @@ LLM_IDENTIFIERS = [
     "ollama/glm4:9b",
     "chutes/deepseek-ai/DeepSeek-V3-0324",
     "chutes/deepseek-ai/DeepSeek-R1",
-    "chutes/deepseek-ai/DeepSeek-V3-0324",
     "chutes/Qwen/Qwen3-235B-A22B",
     "chutes/Qwen/Qwen3-30B-A3B",
     "chutes/Qwen/Qwen3-14B",
