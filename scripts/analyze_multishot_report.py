@@ -149,8 +149,9 @@ def analyze_multishot_report(log_files):
     # Calculate success rates
     for stats_dict in [stats_by_model, stats_by_shots, stats_by_seed, stats_by_test_case, stats_by_problem]:
         for key, value in stats_dict.items():
-            if value["total"] > 0:
-                value["success_rate"] = round(value["passed"] / value["total"] * 100, 2)
+            attempted = value["passed"] + value["failed"]
+            if attempted > 0:
+                value["success_rate"] = round(value["passed"] / attempted * 100, 2)
             else:
                 value["success_rate"] = 0
 
