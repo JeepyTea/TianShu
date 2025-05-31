@@ -136,8 +136,13 @@ def analyze_multishot_report(log_files):
                                         stats_by_problem[problem_key]["skipped"] += 1
                                     else:
                                         print(f"Got unknown outcome type {outcome}")
+                                else:
+                                    print(f"Got unknown nodeid format {nodeid}")
+                            else:
+                                print(f"Got unknown ???")
                     except json.JSONDecodeError:
                         # Skip lines that are not valid JSON
+                        print(f"Got invalid JSON {line}")
                         continue
         except FileNotFoundError:
             print(f"Warning: Report log file not found: {log_file}. Skipping this file.", file=sys.stderr)
@@ -150,10 +155,13 @@ def analyze_multishot_report(log_files):
     for stats_dict in [stats_by_model, stats_by_shots, stats_by_seed, stats_by_test_case, stats_by_problem]:
         for key, value in stats_dict.items():
             attempted = value["passed"] + value["failed"]
+            value["attempted"] = attempted
+            value["total"] = attempted + value["skipped"]
             if attempted > 0:
                 value["success_rate"] = round(value["passed"] / attempted * 100, 2)
             else:
                 value["success_rate"] = 0
+            
 
     return {
         "by_model": dict(stats_by_model),
@@ -166,23 +174,23 @@ def analyze_multishot_report(log_files):
 def print_stats(stats):
     print("\n=== Statistics by Model ===")
     for model, data in sorted(stats["by_model"].items()):
-        print(f"{model}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
+        print(f"{model}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
 
     print("\n=== Statistics by Number of Shots ===")
     for shots, data in sorted(stats["by_shots"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
-        print(f"{shots} shots: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
+        print(f"{shots} shots: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
 
     print("\n=== Statistics by Language Seed ===")
     for seed, data in sorted(stats["by_seed"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
-        print(f"Seed {seed}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
+        print(f"Seed {seed}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total")
 
     print("\n=== Statistics by Test Case ===")
     for test_case, data in sorted(stats["by_test_case"].items()):
-        print(f"{test_case}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
+        print(f"{test_case}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
 
     print("\n=== Statistics by Problem ===")
     for problem, data in sorted(stats["by_problem"].items()):
-        print(f"{problem}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
+        print(f"{problem}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
