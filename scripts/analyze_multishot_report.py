@@ -128,6 +128,8 @@ def analyze_multishot_report(log_files):
                                         stats_by_seed[seed]["failed"] += 1
                                         stats_by_test_case[test_case]["failed"] += 1
                                         stats_by_problem[problem_key]["failed"] += 1
+                                    else:
+                                        print(f"Got unknown outcome type {outcome}")
                     except json.JSONDecodeError:
                         # Skip lines that are not valid JSON
                         continue
