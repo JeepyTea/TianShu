@@ -54,11 +54,11 @@ def analyze_multishot_report(log_files):
     test_case_mapping = load_test_case_to_problem_mapping()
     
     # Initialize statistics containers
-    stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
-    stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
-    stats_by_seed = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
-    stats_by_test_case = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
-    stats_by_problem = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0})
+    stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
+    stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
+    stats_by_seed = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
+    stats_by_test_case = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
+    stats_by_problem = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
 
     # Process each log file provided
     for log_file in log_files:
@@ -128,6 +128,12 @@ def analyze_multishot_report(log_files):
                                         stats_by_seed[seed]["failed"] += 1
                                         stats_by_test_case[test_case]["failed"] += 1
                                         stats_by_problem[problem_key]["failed"] += 1
+                                    elif outcome == 'skipped':
+                                        stats_by_model[model_name]["skipped"] += 1
+                                        stats_by_shots[shots]["skipped"] += 1
+                                        stats_by_seed[seed]["skipped"] += 1
+                                        stats_by_test_case[test_case]["skipped"] += 1
+                                        stats_by_problem[problem_key]["skipped"] += 1
                                     else:
                                         print(f"Got unknown outcome type {outcome}")
                     except json.JSONDecodeError:
@@ -159,23 +165,23 @@ def analyze_multishot_report(log_files):
 def print_stats(stats):
     print("\n=== Statistics by Model ===")
     for model, data in sorted(stats["by_model"].items()):
-        print(f"{model}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+        print(f"{model}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
 
     print("\n=== Statistics by Number of Shots ===")
     for shots, data in sorted(stats["by_shots"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
-        print(f"{shots} shots: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+        print(f"{shots} shots: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
 
     print("\n=== Statistics by Language Seed ===")
     for seed, data in sorted(stats["by_seed"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
-        print(f"Seed {seed}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+        print(f"Seed {seed}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
 
     print("\n=== Statistics by Test Case ===")
     for test_case, data in sorted(stats["by_test_case"].items()):
-        print(f"{test_case}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+        print(f"{test_case}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
 
     print("\n=== Statistics by Problem ===")
     for problem, data in sorted(stats["by_problem"].items()):
-        print(f"{problem}: {data['passed']}/{data['total']} passed ({data['success_rate']}%)")
+        print(f"{problem}: {data['passed']}/{data['total']} passed, {data['failed']} failed, {data['skipped']} skipped ({data['success_rate']}%)")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
