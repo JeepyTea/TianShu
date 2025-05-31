@@ -60,6 +60,9 @@ def analyze_multishot_report(log_files):
     stats_by_test_case = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
     stats_by_problem = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
 
+    # Track seen tests to detect duplicates
+    seen_tests = set()
+    
     # Process each log file provided
     for log_file in log_files:
         try:
@@ -108,6 +111,15 @@ def analyze_multishot_report(log_files):
                                     
                                     # Determine if the test passed or failed
                                     outcome = entry.get('outcome', 'unknown')
+                                    
+                                    # Create a unique test identifier
+                                    test_id = f"{model_name}-{shots}-{seed}-{test_case}"
+                                    
+                                    # Check if we've seen this test before
+                                    if test_id in seen_tests:
+                                        print(f"WARNING: Duplicate test found: {test_id}")
+                                    else:
+                                        seen_tests.add(test_id)
                                     
                                     # Update statistics
                                     stats_by_model[model_name]["total"] += 1
