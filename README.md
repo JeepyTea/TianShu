@@ -2,7 +2,7 @@
 
 A benchmark suite for evaluating Large Language Models (LLMs).
 
-(Read more about TiānshūBench on the JeepyTea blog)[https://jeepytea.github.io/]
+[https://jeepytea.github.io/](Read more about TiānshūBench on the JeepyTea blog)
 
 ## Installation
 
