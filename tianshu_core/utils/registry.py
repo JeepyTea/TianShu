@@ -67,7 +67,7 @@ class LLMRegistry:
             "Qwen/Qwen3-30B-A3B",
             "Qwen/Qwen3-14B",
             "THUDM/GLM-4-32B-0414",
-            "chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
+            "chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8", # {"options": {"temperature": 0.0}}),
             "chutesai/Llama-4-Scout-17B-16E-Instruct",
             "unsloth/gemma-3-27b-it",
             "meta-llama/Llama-3-70B-Instruct",
