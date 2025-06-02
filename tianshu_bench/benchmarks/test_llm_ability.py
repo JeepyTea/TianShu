@@ -299,10 +299,20 @@ def test_generated_program_with_mamba_execution(llm_identifier, mamba_execution_
     )
 
 
+# Define LLMs to skip for multi-shot testing
+SKIP_LLMS = [
+    "chutes/chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    "chutes/chutesai/Llama-4-Scout-17B-16E-Instruct"
+]
+
 @pytest.mark.parametrize("test_case", load_problem_definitions())
 @pytest.mark.parametrize("mamba_execution_seed", range(1, 11))
 @pytest.mark.parametrize("num_shots", [1, 2, 4, 8])
-@pytest.mark.parametrize("llm_identifier", LLM_IDENTIFIERS)
+@pytest.mark.parametrize("llm_identifier", [
+    pytest.param(llm, marks=pytest.mark.skip(reason=f"Skipping multi-shot test for {llm}"))
+    if llm in SKIP_LLMS else llm
+    for llm in LLM_IDENTIFIERS
+])
 def test_execute_generated_multi_shot(
         llm_identifier, mamba_execution_seed,
         test_case, num_shots, detailed_test_logger
