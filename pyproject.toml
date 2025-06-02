@@ -98,14 +98,13 @@ testpaths = ["tianshu_bench/benchmarks"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short --strict-markers"
+addopts = "-v --tb=short --strict-markers --alluredir=./results/allure-results"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "requires_gpu: marks tests that require GPU",
     "model_specific: marks tests for specific models",
     "tianshu: mark test as part of TiānshūBench",
 ]
-addopts = "--alluredir=./allure-results"
 
 [tool.black]
 line-length = 100

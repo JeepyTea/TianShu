@@ -68,7 +68,7 @@ class LLMRegistry:
             ("Qwen/Qwen3-14B", {"context_length": 32000, "temperature": 0.7}),
             ("THUDM/GLM-4-32B-0414", {"context_length": 128000, "temperature": 0.7}),
             ("chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8", {"context_length": 128000, "temperature": 0.0}),
-            ("chutesai/Llama-4-Scout-17B-16E-Instruct", {"context_length": 32000, "temperature": 0.7}),
+            ("chutesai/Llama-4-Scout-17B-16E-Instruct", {"context_length": 32000, "temperature": 0.0}),
             ("unsloth/gemma-3-27b-it", {"context_length": 32000, "temperature": 0.7}),
             ("meta-llama/Llama-3-70B-Instruct", {"context_length": 32000, "temperature": 0.7}),
             ("mistralai/Mistral-7B-Instruct-v0.2", {"context_length": 32000, "temperature": 0.7}),

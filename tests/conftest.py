@@ -9,7 +9,7 @@ LLM_IDENTIFIERS = [
     "ollama/phi4:14b-q4_K_M",
     "ollama/deepseek-r1:14b",
     "ollama/qwen3:14b",
-    # Add SambaNova models with skipif markers below
+    "chutes/chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
 ]
 
 # Add SambaNova models if API key is available

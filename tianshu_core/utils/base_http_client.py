@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import random
 import requests
 import json
@@ -10,7 +10,7 @@ from .base import BaseLLMClient
 class BaseHttpLLMClient(BaseLLMClient):
     """Base implementation for HTTP-based LLM clients with common functionality."""
 
-    DEFAULT_TIMEOUT = 240  # Default timeout in seconds
+    DEFAULT_TIMEOUT = 300  # Default timeout in seconds
 
     def __init__(self, local_config: dict):
         """
@@ -72,6 +72,9 @@ class BaseHttpLLMClient(BaseLLMClient):
                     json=payload,
                     timeout=self.timeout,
                 )
+                print(
+                    f"🔴_make_http_request Response text: {response.text[:1200]}..."
+                )
                 response.raise_for_status()
 
                 try:
@@ -96,8 +99,8 @@ class BaseHttpLLMClient(BaseLLMClient):
                     )
                     # We may have forced the random seed in the Mamba language
                     # interpreter, so set the seed to the system time.
-                    random.seed(datetime.now().timestamp()) 
-                    time.sleep(20 + 10*random.random())
+                    random.seed(datetime.now().timestamp())
+                    time.sleep(10 + 30*random.random())
                     current_num_retries += 4
                     delay = 20
                 retry_count += 1

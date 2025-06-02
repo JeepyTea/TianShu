@@ -38,7 +38,7 @@ Take requests for creation of new code.
 Always reply to the user in English.
 You MUST:
 1. Explain any code.
-2. Output a copy of the entire requested code."""
+2. Output a copy of the entire requested code at the END of your response."""
 
 
 def reset_mamba_state():

@@ -49,10 +49,10 @@ def analyze_multishot_report(log_files):
     """
     # Load problem definitions to map IDs to names
     problem_definitions = load_problem_definitions()
-    
+
     # Load test case to problem mapping
     test_case_mapping = load_test_case_to_problem_mapping()
-    
+
     # Initialize statistics containers
     stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
     stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
@@ -62,15 +62,16 @@ def analyze_multishot_report(log_files):
 
     # Track seen tests to detect duplicates
     seen_tests = set()
-    
+    count = 0
+
     # Process each log file provided
     for log_file in log_files:
         try:
             with open(log_file, 'r') as f:
                 for line in f:
+
                     try:
                         entry = json.loads(line)
-
                         # Only process test results
                         if entry.get('$report_type') == 'TestReport' and entry.get('when') == 'call':
                             nodeid = entry.get('nodeid', '')
@@ -79,26 +80,26 @@ def analyze_multishot_report(log_files):
                             if 'test_execute_generated_multi_shot' in nodeid:
                                 # Parse the parameters from the nodeid
                                 # Format: test_execute_generated_multi_shot[chutes/chutesai/Llama-4-Scout-17B-16E-Instruct-4-2-test_case5]
-                                
+
                                 # Extract the part between square brackets
                                 if '[' in nodeid and ']' in nodeid:
                                     params_part = nodeid.split('[')[1].split(']')[0]
-                                    
+
                                     # Split by hyphens to get components
                                     parts = params_part.split('-')
-                                    
+
                                     # The last part is the test case
                                     test_case = parts[-1]
-                                    
+
                                     # The second-to-last part is the language seed
                                     seed = parts[-2]
-                                    
+
                                     # The third-to-last part is the number of shots
                                     shots = parts[-3]
-                                    
+
                                     # Everything before that is the model name
                                     model_name = '-'.join(parts[:-3])
-                                    
+
                                     # Get problem ID and name from test case mapping
                                     if test_case in test_case_mapping:
                                         problem_id = test_case_mapping[test_case]["problem_id"]
@@ -106,28 +107,28 @@ def analyze_multishot_report(log_files):
                                     else:
                                         problem_id = "unknown"
                                         problem_name = "Unknown Problem"
-                                    
+
                                     problem_key = f"{problem_id}: {problem_name}"
-                                    
+
                                     # Determine if the test passed or failed
                                     outcome = entry.get('outcome', 'unknown')
-                                    
+
                                     # Create a unique test identifier
                                     test_id = f"{model_name}-{shots}-{seed}-{test_case}"
-                                    
+
                                     # Check if we've seen this test before
                                     if test_id in seen_tests:
                                         print(f"WARNING: Duplicate test found: {test_id}")
                                     else:
                                         seen_tests.add(test_id)
-                                    
+
                                     # Update statistics
                                     stats_by_model[model_name]["total"] += 1
                                     stats_by_shots[shots]["total"] += 1
                                     stats_by_seed[seed]["total"] += 1
                                     stats_by_test_case[test_case]["total"] += 1
                                     stats_by_problem[problem_key]["total"] += 1
-                                    
+
                                     if outcome == 'passed':
                                         stats_by_model[model_name]["passed"] += 1
                                         stats_by_shots[shots]["passed"] += 1
@@ -173,7 +174,7 @@ def analyze_multishot_report(log_files):
                 value["success_rate"] = round(value["passed"] / attempted * 100, 2)
             else:
                 value["success_rate"] = 0
-            
+
 
     return {
         "by_model": dict(stats_by_model),
