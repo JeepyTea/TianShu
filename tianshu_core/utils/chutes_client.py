@@ -26,6 +26,8 @@ class ChutesClient(BaseHttpLLMClient):
                     'base_url': (Optional) The API endpoint URL (defaults to Chutes API endpoint).
                     'timeout': (Optional) Request timeout in seconds (default: 120).
                     'headers': (Optional) Additional custom headers dictionary.
+                    'temperature': (Optional) Temperature setting for the model.
+                    'context_length': (Optional) Maximum context length for the model.
         """
         # Prioritize config value, then env var, then default for base_url
         local_config.setdefault(
@@ -34,11 +36,17 @@ class ChutesClient(BaseHttpLLMClient):
         # Prioritize config value, then env var, then the hardcoded default for model
         local_config.setdefault("model", os.environ.get("CHUTES_MODEL", _DEFAULT_MODEL))
         local_config.setdefault("api_token", Config.CHUTES_API_KEY)
+        
+        # Set default temperature and context length if not provided
+        local_config.setdefault("temperature", 0.7)
+        local_config.setdefault("context_length", 32000)
 
         super().__init__(local_config)
 
         self.api_token = self.config.get("api_token")
         self.model = self.config.get("model")
+        self.temperature = self.config.get("temperature")
+        self.context_length = self.config.get("context_length")
 
         # Add authorization header if token is provided
         if self.api_token:
@@ -85,9 +93,10 @@ class ChutesClient(BaseHttpLLMClient):
         chutes_params = {
             "model": self.model,
             "messages": messages,
-            # Map common parameters with appropriate defaults
-            "temperature": kwargs.get("temperature", 0.7),
-            "max_tokens": kwargs.get("max_tokens", 50000),
+            # Use configured temperature if not overridden in kwargs
+            "temperature": kwargs.get("temperature", self.temperature),
+            # Use configured context length for max_tokens if not overridden
+            "max_tokens": kwargs.get("max_tokens", self.context_length),
             "stream": False,  # We want the complete response, not streaming
         }
 
@@ -137,9 +146,10 @@ class ChutesClient(BaseHttpLLMClient):
         chutes_params = {
             "model": self.model,
             "messages": messages,
-            # Map common parameters with appropriate defaults
-            "temperature": kwargs.get("temperature", 0.7),
-            "max_tokens": kwargs.get("max_tokens", 30000),
+            # Use configured temperature if not overridden in kwargs
+            "temperature": kwargs.get("temperature", self.temperature),
+            # Use configured context length for max_tokens if not overridden
+            "max_tokens": kwargs.get("max_tokens", self.context_length),
             "stream": False,  # We want the complete response, not streaming
         }
 

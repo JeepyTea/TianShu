@@ -61,22 +61,28 @@ class LLMRegistry:
     def _register_chutes_models(self):
         """Register predefined Chutes models."""
         chutes_models = [
-            "deepseek-ai/DeepSeek-R1",
-            "deepseek-ai/DeepSeek-V3-0324",
-            "Qwen/Qwen3-235B-A22B",
-            "Qwen/Qwen3-30B-A3B",
-            "Qwen/Qwen3-14B",
-            "THUDM/GLM-4-32B-0414",
-            "chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8", # {"options": {"temperature": 0.0}}),
-            "chutesai/Llama-4-Scout-17B-16E-Instruct",
-            "unsloth/gemma-3-27b-it",
-            "meta-llama/Llama-3-70B-Instruct",
-            "mistralai/Mistral-7B-Instruct-v0.2",
+            ("deepseek-ai/DeepSeek-R1", {"context_length": 128000, "temperature": 0.7}),
+            ("deepseek-ai/DeepSeek-V3-0324", {"context_length": 128000, "temperature": 0.7}),
+            ("Qwen/Qwen3-235B-A22B", {"context_length": 128000, "temperature": 0.7}),
+            ("Qwen/Qwen3-30B-A3B", {"context_length": 32000, "temperature": 0.7}),
+            ("Qwen/Qwen3-14B", {"context_length": 32000, "temperature": 0.7}),
+            ("THUDM/GLM-4-32B-0414", {"context_length": 128000, "temperature": 0.7}),
+            ("chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8", {"context_length": 128000, "temperature": 0.0}),
+            ("chutesai/Llama-4-Scout-17B-16E-Instruct", {"context_length": 32000, "temperature": 0.7}),
+            ("unsloth/gemma-3-27b-it", {"context_length": 32000, "temperature": 0.7}),
+            ("meta-llama/Llama-3-70B-Instruct", {"context_length": 32000, "temperature": 0.7}),
+            ("mistralai/Mistral-7B-Instruct-v0.2", {"context_length": 32000, "temperature": 0.7}),
         ]
 
-        for model in chutes_models:
+        for model_info in chutes_models:
+            if isinstance(model_info, tuple):
+                model, config = model_info
+            else:
+                model = model_info
+                config = {}
+                
             key = f"chutes/{model}"
-            self._registry[key] = (ChutesClient, {"model": model})
+            self._registry[key] = (ChutesClient, {"model": model, **config})
 
     def get_client(self, model_id: str, **additional_config) -> BaseLLMClient:
         """
