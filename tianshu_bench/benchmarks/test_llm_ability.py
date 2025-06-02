@@ -2,6 +2,9 @@ import pytest
 import os
 import csv
 import re  # Added for program extraction
+import allure
+import logging
+import datetime
 
 # Import LLM client base class and specific clients if needed for type hinting or direct use
 from tianshu_core.utils import LLMRegistry  # Import the registry
@@ -22,6 +25,10 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+LOG_BASE_DIR = PROJECT_ROOT / "results" / "test_logs"
+os.makedirs(LOG_BASE_DIR, exist_ok=True)
+
 
 PROMPT_SEPARATOR = "\n\n---\n\n"
 
@@ -122,6 +129,47 @@ def load_problem_definitions():
     return test_cases
 
 
+@pytest.fixture(scope="function")
+def detailed_test_logger(request):
+    # Create a unique subdirectory for this specific test's logs if needed
+    test_run_timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    # Sanitize test name for filename/dirname
+    sanitized_test_name = request.node.name.replace("[", "_").replace("]", "").replace("/", "_")
+    test_log_dir = os.path.join(LOG_BASE_DIR, sanitized_test_name, test_run_timestamp)
+    os.makedirs(test_log_dir, exist_ok=True)
+
+    log_file_name = "detailed.log"
+    log_file_path = os.path.join(test_log_dir, log_file_name)
+
+    logger = logging.getLogger(f"detailed_logger_{sanitized_test_name}")
+    logger.setLevel(logging.DEBUG)
+
+    # Prevent duplicate handlers
+    if not logger.handlers:
+        file_handler = logging.FileHandler(log_file_path, mode='w')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    print(f"Detailed logging for {request.node.name} to: {log_file_path}") # For console feedback
+
+    yield logger
+
+    # Teardown: Detach handler and attach log file to Allure report
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)
+
+    if os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0: # Only attach if file exists and is not empty
+        try:
+            allure.attach.file(log_file_path, name=f"Detailed Log for {sanitized_test_name}",
+                               attachment_type=allure.attachment_type.TEXT)
+        except Exception as e:
+            print(f"Error attaching log {log_file_path} to Allure: {e}")
+    # else:
+    #     print(f"Log file {log_file_path} not found or empty, not attaching.")
+
+
 @pytest.mark.parametrize("test_case", load_problem_definitions())
 @pytest.mark.parametrize("mamba_execution_seed", range(1, 11))
 @pytest.mark.parametrize("llm_identifier", LLM_IDENTIFIERS)
@@ -150,7 +198,8 @@ def test_generated_program_with_mamba_execution(llm_identifier, mamba_execution_
 
     prompt_contents = []
     for rel_path in dynamic_prompt_file_paths:
-        prompt_contents.append(read_prompt_file(rel_path))
+        prompt = read_prompt_file(rel_path)
+        prompt_contents.append(prompt)
 
     concatenated_prompt = PROMPT_SEPARATOR.join(prompt_contents)
 
@@ -254,7 +303,10 @@ def test_generated_program_with_mamba_execution(llm_identifier, mamba_execution_
 @pytest.mark.parametrize("mamba_execution_seed", range(1, 11))
 @pytest.mark.parametrize("num_shots", [1, 2, 4, 8])
 @pytest.mark.parametrize("llm_identifier", LLM_IDENTIFIERS)
-def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test_case, num_shots):
+def test_execute_generated_multi_shot(
+        llm_identifier, mamba_execution_seed,
+        test_case, num_shots, detailed_test_logger
+    ):
     """
     Tests fetching a program from the LLM client for a specific problem,
     executing it with the Mamba interpreter, and checking for expected output.
@@ -267,7 +319,7 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
     try:
         client = registry.get_client(llm_identifier, **LLM_PARAMS)
     except ValueError as e:
-        pytest.skip(f"Skipping test for {llm_identifier}: {str(e)}")
+        pytest.xfail(f"Skipping test for {llm_identifier}: {str(e)}")
 
     problem_name = test_case["name"]
     problem_id = test_case["id"]
@@ -283,9 +335,15 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
     ]
     prompt_contents = []
     for rel_path in dynamic_prompt_file_paths:
-        prompt_contents.append(read_prompt_file(rel_path))
+        prompt = read_prompt_file(rel_path)
+        prompt_contents.append(prompt)
+
+    prompt_contents.append(".")
 
     concatenated_prompt = PROMPT_SEPARATOR.join(prompt_contents)
+    detailed_test_logger.debug(f"System prompt: {SYSTEM_PROMPT}")
+    detailed_test_logger.debug("--")
+    detailed_test_logger.debug(f"Beginning prompt: {concatenated_prompt}")
 
     # Initialize conversation history
     conversation_history = [
@@ -302,8 +360,10 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
             try:
                 # print("test_execute_generated_multi_shot 60 about to send chat request")
                 llm_response_text = client.send_chat(
-                    conversation_history, num_retries=2, **LLM_PARAMS
+                    conversation_history, num_retries=5, **LLM_PARAMS
                 )
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug(f"LLM response: {llm_response_text}")
                 # print("test_execute_generated_multi_shot 70 got chat request")
             except (NotImplementedError, AttributeError) as e:
                 # print(f"test_execute_generated_multi_shot 75 request error {e}")
@@ -320,8 +380,10 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
                 # print("test_execute_generated_multi_shot 78 request error")
         except Exception as e:
             # print(f"test_execute_generated_multi_shot 78 request error {e}")
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug(f"{client.__class__.__name__}.send_chat/send_prompt failed with an exception: {e}")
             # Immediately error out of the test if the LLM request fails
-            pytest.skip(
+            pytest.xfail(
                 f"{client.__class__.__name__}.send_chat/send_prompt failed with an exception: {e}"
             )
 
@@ -330,22 +392,28 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
         # print("test_execute_generated_multi_shot 80")
 
         # 3. Extract Program from LLM Response
-        assert isinstance(llm_response_text, str), "LLM response should be a string."
-        assert len(llm_response_text) > 0, "LLM response should not be empty."
+        assert isinstance(llm_response_text, str), f"E001 LLM response should be a string. Got type: {type(llm_response_text)}"
+        assert len(llm_response_text) > 0, "E002 LLM response should not be empty."
 
         code_blocks = re.findall(r"```(?:[a-zA-Z]+\n)?(.*?)```", llm_response_text, re.DOTALL)
         generated_program = ""
         if code_blocks:
             # Get the last code block
             generated_program = code_blocks[-1].strip()
+        detailed_test_logger.debug("--")
+        detailed_test_logger.debug(f"Generated program: {generated_program}")
 
         if not generated_program:
             if shot == num_shots - 1:  # Last attempt
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug("Error: E003")
                 assert (
                     False
-                ), f"No program found in LLM response after {num_shots} attempts. Response was:\n{llm_response_text}"
+                ), f"E003 No program found in LLM response after {num_shots} attempts. Response was:\n{llm_response_text}"
             # Add guidance and continue to next shot
-            guidance = f"No code block was found in your response. Please provide a complete solution enclosed in triple backticks (```)."
+            guidance = "No code block was found in your response. Please provide a complete solution enclosed in triple backticks (```)."
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug(f"Guidance: {guidance}")
             conversation_history.append({"role": "user", "content": guidance})
             continue
 
@@ -405,8 +473,12 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
         except Exception as e:
             # print("test_execute_generated_multi_shot 130")
             if shot == num_shots - 1:  # Last attempt
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug("Error: E004")
                 pytest.fail(
-                    f"Mamba execution failed for Problem-{problem_id}, test case '{input_value}' with exception: {e}\n"
+                    f"E004 Mamba execution failed for Problem-{problem_id}, test case '{input_value}' with exception: {e}\n"
+                    f"seed: {mamba_execution_seed} \n"
+                    f"Shot: {shot+1}\n"
                     f"Program was:\n{generated_program}\n"
                     f"Output log: {output_log}"
                 )
@@ -415,6 +487,8 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
                 f"Your program failed with error: {str(e)}. Please fix the issue and try again."
             )
             conversation_history.append({"role": "user", "content": guidance})
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug(f"Guidance: {guidance}")
             # print("test_execute_generated_multi_shot 140")
             reset_mamba_state()  # Clean up Mamba state after execution
             continue
@@ -424,9 +498,12 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
         stderr_messages = [msg for stream, msg in output_log if stream == "stderr"]
         if stderr_messages:
             if shot == num_shots - 1:  # Last attempt
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug("Error: E005")
                 pytest.fail(
-                    f"Problem-{problem_id}, problem '{problem_name}' test case in: '{input_value}' "
-                    f"seed {mamba_execution_seed}: "
+                    f"E005 Problem-{problem_id}, problem '{problem_name}' test case in: '{input_value}' "
+                    f"seed: {mamba_execution_seed} \n"
+                    f"Shot: {shot+1}\n"
                     f"Expected output '{expected_output}', but got stderr output \n"
                     f"'{''.join(stderr_messages)}'.\n"
                     f"Program was:\n{generated_program}\n"
@@ -435,6 +512,8 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
             # Add guidance and continue to next shot
             # print("test_execute_generated_multi_shot 160")
             guidance = f"Your program produced errors: {''.join(stderr_messages)}. Please fix the issues and try again."
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug(f"Guidance: {guidance}")
             conversation_history.append({"role": "user", "content": guidance})
             reset_mamba_state()  # Clean up Mamba state after execution
             continue
@@ -442,16 +521,25 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
         # 6. Check output matches expected
         stdout_messages = [msg for stream, msg in output_log if stream == "stdout"]
         full_stdout = "".join(stdout_messages)
+        detailed_test_logger.debug("--")
+        detailed_test_logger.debug(f"Program output: {full_stdout}")
+
         # print("test_execute_generated_multi_shot 170")
         if full_stdout == expected_output:
             # Success! Break out of the loop
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug("🟢 Program output was correct!")
             reset_mamba_state()  # Clean up Mamba state after execution
             return
 
         if shot == num_shots - 1:  # Last attempt
+            if full_stdout != expected_output:
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug("Error: E006")
             assert full_stdout == expected_output, (
-                f"Problem-{problem_id}, problem '{problem_name}' in: '{input_value}' "
-                f"seed {mamba_execution_seed}: "
+                f"E006 Problem-{problem_id}, problem '{problem_name}' in: '{input_value}' "
+                f"seed: {mamba_execution_seed} "
+                f"Shot: {shot+1}\n"
                 f"Expected output '{expected_output}', but got '{full_stdout}'.\n"
                 f"Program was:\n{generated_program}\n"
                 f"Full Mamba output log: {output_log}"
@@ -459,6 +547,8 @@ def test_execute_generated_multi_shot(llm_identifier, mamba_execution_seed, test
         # print("test_execute_generated_multi_shot 180")
         # Add guidance and continue to next shot
         guidance = f"Your program produced incorrect output. Expected: '{expected_output}', but got: '{full_stdout}'. Please fix your solution."
+        detailed_test_logger.debug("--")
+        detailed_test_logger.debug(f"Guidance: {guidance}")
         conversation_history.append({"role": "user", "content": guidance})
         reset_mamba_state()  # Clean up Mamba state after execution
 
@@ -494,7 +584,7 @@ def test_conversation_history(llm_identifier, mamba_execution_seed, test_case):
 
     prompt_contents = []
     for rel_path in dynamic_prompt_file_paths:
-        prompt_contents.append(read_prompt_file(rel_path))
+        prompt_contents.append(read_prompt_file(rel_path)[:200])
 
     concatenated_prompt = PROMPT_SEPARATOR.join(prompt_contents)
 
