@@ -23,7 +23,8 @@ import mamba.parser
 
 from pathlib import Path
 
-
+# Longest time each test may run
+MAX_EXECUTION_TIME_SECONDS = 10*60
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 LOG_BASE_DIR = PROJECT_ROOT / "results" / "test_logs"
@@ -88,7 +89,9 @@ LLM_IDENTIFIERS = [
     "ollama/qwen2.5:0.5b",
     "ollama/glm4:9b",
     "chutes/deepseek-ai/DeepSeek-V3-0324",
+    "chutes/deepseek-ai/DeepSeek-R1-0528",
     "chutes/deepseek-ai/DeepSeek-R1",
+    "chutes/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
     "chutes/Qwen/Qwen3-235B-A22B",
     "chutes/Qwen/Qwen3-30B-A3B",
     "chutes/Qwen/Qwen3-14B",
@@ -324,6 +327,7 @@ def test_execute_generated_multi_shot(
     The Mamba execution is parameterized with different random seeds.
     Uses multi-shot approach with conversation history, retrying with guidance if the program fails.
     """
+    start_time = datetime.datetime.now()
     # Create registry and get the client
     registry = LLMRegistry()
     try:
@@ -363,8 +367,11 @@ def test_execute_generated_multi_shot(
 
     # Multi-shot loop
     for shot in range(num_shots):
-        # print("test_execute_generated_multi_shot 50")
-        # 2. Call client.send_chat with current conversation history
+        current_time = datetime.datetime.now()
+        elapsed_time = current_time - start_time
+        if elapsed_time.seconds > MAX_EXECUTION_TIME_SECONDS:
+            detailed_test_logger.debug(f"Error E007 - Execution time exceeded limit. Elapsed seconds: {elapsed_time.seconds}")
+            pytest.fail(f"Error E007 - Execution time exceeded limit. Elapsed seconds: {elapsed_time.seconds}")
         try:
             # Try to use send_chat if available, otherwise fall back to send_prompt
             try:
@@ -396,7 +403,6 @@ def test_execute_generated_multi_shot(
             pytest.xfail(
                 f"{client.__class__.__name__}.send_chat/send_prompt failed with an exception: {e}"
             )
-
         # Add the assistant's response to the conversation history
         conversation_history.append({"role": "assistant", "content": llm_response_text})
         # print("test_execute_generated_multi_shot 80")
