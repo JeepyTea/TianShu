@@ -43,7 +43,9 @@ def load_executed_nodeids(log_file_path):
             for line in f:
                 try:
                     entry = json.loads(line.strip())
-                    if entry.get('$report_type') == 'TestReport' and 'nodeid' in entry:
+                    if (entry.get('$report_type') == 'TestReport' and 
+                        'nodeid' in entry and 
+                        entry.get('when') == 'call'):
                         executed_nodeids.add(entry['nodeid'])
                 except json.JSONDecodeError:
                     continue
