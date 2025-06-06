@@ -8,8 +8,13 @@ A phrase may contain 0 or multiple other phrases.
 Output "OK" if the delimeters match correctly, or "BAD" if they do not.
 
 be -> OK
+-
 bbee -> OK
+-
 bbebee -> OK
+-
 eebb -> BAD, e before b
+-
 bbeee -> BAD, unmatched e
+-
 bbebbee -> BAD, unmatched b
