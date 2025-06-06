@@ -11,6 +11,29 @@ import sys
 from pathlib import Path
 
 
+def normalize_nodeid(nodeid, full_test_path=None):
+    """Normalize nodeids to handle path differences between expected and executed tests."""
+    if not nodeid:
+        return nodeid
+    
+    # If we have a full test path and the nodeid doesn't contain the full path,
+    # try to construct the full nodeid
+    if full_test_path and '::' in nodeid and not nodeid.startswith(full_test_path.split('::')[0]):
+        # Extract just the filename from the nodeid
+        if '::' in nodeid:
+            parts = nodeid.split('::', 1)
+            filename = parts[0]
+            test_part = parts[1]
+            
+            # If the filename is just the basename, prepend the full path
+            if '/' not in filename and full_test_path:
+                base_path = full_test_path.split('::')[0]
+                if base_path.endswith('/' + filename):
+                    return f"{base_path}::{test_part}"
+    
+    return nodeid
+
+
 def load_executed_nodeids(log_file_path):
     """Load executed test nodeids from pytest JSON log file."""
     executed_nodeids = set()
@@ -69,7 +92,9 @@ def get_expected_nodeids(test_path, filter_expression=None):
                 # Pattern 1: Direct nodeid format (most common with -q)
                 if '::' in line_stripped and '[' in line_stripped and ']' in line_stripped:
                     if not line_stripped.startswith('<') and not line_stripped.startswith('='):
-                        expected_nodeids.add(line_stripped)
+                        # Normalize the nodeid to match the full path format
+                        normalized_nodeid = normalize_nodeid(line_stripped, test_path)
+                        expected_nodeids.add(normalized_nodeid)
                 
                 # Pattern 2: Parse tree format with <Function> tags
                 elif line_stripped.startswith('<Module ') and line_stripped.endswith('>'):
@@ -91,10 +116,11 @@ def get_expected_nodeids(test_path, filter_expression=None):
                     if current_module:
                         # Construct full nodeid: module::function
                         nodeid = f"{current_module}::{function_full}"
-                        expected_nodeids.add(nodeid)
+                        normalized_nodeid = normalize_nodeid(nodeid, test_path)
+                        expected_nodeids.add(normalized_nodeid)
                         found_count = found_count+1
                         if found_count<10:
-                            print(f"Found test: {nodeid}")
+                            print(f"Found test: {normalized_nodeid}")
                         elif not output_elipses:
                             print("...")
                             output_elipses = True
@@ -104,11 +130,13 @@ def get_expected_nodeids(test_path, filter_expression=None):
                         if '::' in test_path:
                             base_path = test_path.rsplit('::', 1)[0]
                             nodeid = f"{base_path}::{function_full}"
-                            expected_nodeids.add(nodeid)
+                            normalized_nodeid = normalize_nodeid(nodeid, test_path)
+                            expected_nodeids.add(normalized_nodeid)
                 
                 # Pattern 3: Lines that look like test paths (fallback)
                 elif '::test_' in line_stripped and not line_stripped.startswith('<'):
-                    expected_nodeids.add(line_stripped)
+                    normalized_nodeid = normalize_nodeid(line_stripped, test_path)
+                    expected_nodeids.add(normalized_nodeid)
             
             # If we found tests, break out of the loop
             if expected_nodeids:
@@ -141,7 +169,8 @@ def get_expected_nodeids(test_path, filter_expression=None):
                     parts = line.split()
                     for part in parts:
                         if '::test_' in part and '[' in part:
-                            expected_nodeids.add(part)
+                            normalized_nodeid = normalize_nodeid(part, test_path)
+                            expected_nodeids.add(normalized_nodeid)
                             
         except subprocess.CalledProcessError as e:
             print(f"Verbose command also failed: {e}")
@@ -190,6 +219,12 @@ Examples:
         help='Output file to save missing test nodeids'
     )
     
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Show debug information about nodeid matching'
+    )
+    
     args = parser.parse_args()
     
     # Load executed tests from log file
@@ -216,6 +251,22 @@ Examples:
     expected_nodeids = get_expected_nodeids(test_path, filter_expr)
     print(f"Found {len(expected_nodeids)} expected tests")
 
+    if args.debug:
+        print(f"\n=== DEBUG: NODEID COMPARISON ===")
+        print("Sample expected nodeids:")
+        for nodeid in sorted(list(expected_nodeids))[:5]:
+            print(f"  Expected: {nodeid}")
+        print("Sample executed nodeids:")
+        for nodeid in sorted(list(executed_nodeids))[:5]:
+            print(f"  Executed: {nodeid}")
+        
+        # Check for any exact matches
+        exact_matches = expected_nodeids.intersection(executed_nodeids)
+        print(f"Exact matches found: {len(exact_matches)}")
+        if exact_matches:
+            print("Sample exact matches:")
+            for nodeid in sorted(list(exact_matches))[:3]:
+                print(f"  Match: {nodeid}")
     
     # Find missing combinations
     missing_nodeids = list(set(expected_nodeids) - set(executed_nodeids))
