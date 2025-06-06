@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to find missing pytest parameter combinations by comparing expected vs executed tests.
-Usage: python find_missing_pytest_combinations.py <report_log_file.json>
+Usage: python find_missing_pytest_combinations.py <report_log_file1.json> [report_log_file2.json ...]
 """
 
 import argparse
@@ -34,27 +34,34 @@ def normalize_nodeid(nodeid, full_test_path=None):
     return nodeid
 
 
-def load_executed_nodeids(log_file_path):
-    """Load executed test nodeids from pytest JSON log file."""
+def load_executed_nodeids(log_file_paths):
+    """Load executed test nodeids from pytest JSON log files."""
     executed_nodeids = set()
     
-    try:
-        with open(log_file_path, 'r') as f:
-            for line in f:
-                try:
-                    entry = json.loads(line.strip())
-                    if (entry.get('$report_type') == 'TestReport' and 
-                        'nodeid' in entry and 
-                        entry.get('when') == 'call'):
-                        executed_nodeids.add(entry['nodeid'])
-                except json.JSONDecodeError:
-                    continue
-    except FileNotFoundError:
-        print(f"Error: Log file '{log_file_path}' not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error reading log file: {e}")
-        sys.exit(1)
+    for log_file_path in log_file_paths:
+        print(f"Processing log file: {log_file_path}")
+        try:
+            with open(log_file_path, 'r') as f:
+                file_nodeids = set()
+                for line in f:
+                    try:
+                        entry = json.loads(line.strip())
+                        if (entry.get('$report_type') == 'TestReport' and 
+                            'nodeid' in entry and 
+                            entry.get('when') == 'call'):
+                            file_nodeids.add(entry['nodeid'])
+                    except json.JSONDecodeError:
+                        continue
+                
+                print(f"  Found {len(file_nodeids)} executed tests in {log_file_path}")
+                executed_nodeids.update(file_nodeids)
+                
+        except FileNotFoundError:
+            print(f"Error: Log file '{log_file_path}' not found.")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error reading log file '{log_file_path}': {e}")
+            sys.exit(1)
     
     return executed_nodeids
 
@@ -195,15 +202,16 @@ def main():
 Examples:
   python find_missing_pytest_combinations.py results/report-log-2024-01-15T14:30.json
   
-  python find_missing_pytest_combinations.py results/report-log-2024-01-15T14:30.json \\
+  python find_missing_pytest_combinations.py results/report-log-1.json results/report-log-2.json \\
     --test-path "tianshu_bench/benchmarks/test_llm_ability.py::test_execute_generated_multi_shot" \\
     --filter "chutes/ and DeepSeek"
         """
     )
     
     parser.add_argument(
-        'log_file', 
-        help='Path to the pytest JSON report log file'
+        'log_files', 
+        nargs='+',
+        help='Path(s) to the pytest JSON report log file(s)'
     )
     
     parser.add_argument(
@@ -229,10 +237,13 @@ Examples:
     
     args = parser.parse_args()
     
-    # Load executed tests from log file
-    print(f"Loading executed tests from: {args.log_file}")
-    executed_nodeids = load_executed_nodeids(args.log_file)
-    print(f"Found {len(executed_nodeids)} executed tests")
+    # Load executed tests from log files
+    print(f"Loading executed tests from {len(args.log_files)} log file(s):")
+    for log_file in args.log_files:
+        print(f"  - {log_file}")
+    
+    executed_nodeids = load_executed_nodeids(args.log_files)
+    print(f"Found {len(executed_nodeids)} total executed tests across all files")
     
     # Get expected tests
     if args.test_path:
@@ -240,7 +251,7 @@ Examples:
         filter_expr = args.filter
     else:
         # Try to extract from log file or use current directory
-        test_path, filter_expr = extract_test_info_from_log(args.log_file)
+        test_path, filter_expr = extract_test_info_from_log(args.log_files[0])
         if not test_path:
             print("Warning: No test path specified. Using current directory.")
             print("Use --test-path to specify a specific test path for more accurate results.")
