@@ -3,6 +3,7 @@ from .base import BaseLLMClient
 from .ollama_client import OllamaClient
 from .samba_nova_client import SambaNovaClient
 from .chutes_client import ChutesClient
+from .nvidia_client import NvidiaClient
 
 
 class LLMRegistry:
@@ -23,6 +24,9 @@ class LLMRegistry:
 
         # Register Chutes models
         self._register_chutes_models()
+
+        # Register NVIDIA models
+        self._register_nvidia_models()
 
     def _register_ollama_models(self):
         """Register predefined Ollama models."""
@@ -85,6 +89,24 @@ class LLMRegistry:
                 
             key = f"chutes/{model}"
             self._registry[key] = (ChutesClient, {"model": model, **config})
+
+    def _register_nvidia_models(self):
+        """Register predefined NVIDIA models."""
+        nvidia_models = [
+            ("meta/llama-4-maverick-17b-128e-instruct", {"context_length": 128000, "max_tokens": 512, "temperature": 0.7}),
+            ("google/gemma-7b", {"context_length": 8192, "max_tokens": 512, "temperature": 0.7}),
+            ("mistralai/mixtral-8x7b-instruct-v0.1", {"context_length": 32768, "max_tokens": 512, "temperature": 0.7}),
+            ("nvidia/nemotron-4-340b-instruct", {"context_length": 128000, "max_tokens": 512, "temperature": 0.7}),
+        ]
+
+        for model_info in nvidia_models:
+            if isinstance(model_info, tuple):
+                model, config = model_info
+            else:
+                model = model_info
+                config = {}
+            key = f"nvidia/{model}"
+            self._registry[key] = (NvidiaClient, {"model": model, **config})
 
     def get_client(self, model_id: str, **additional_config) -> BaseLLMClient:
         """
