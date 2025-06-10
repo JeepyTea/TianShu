@@ -5,6 +5,7 @@ import re  # Added for program extraction
 import allure
 import logging
 import datetime
+import concurrent.futures
 
 # Import LLM client base class and specific clients if needed for type hinting or direct use
 from tianshu_core.utils import LLMRegistry  # Import the registry
@@ -330,7 +331,7 @@ def test_execute_generated_multi_shot(
     try:
         client = registry.get_client(llm_identifier, **LLM_PARAMS)
     except ValueError as e:
-        pytest.xfail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
+        pytest.x fail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
 
     # Log LLM configuration details
     detailed_test_logger.debug("=== LLM Configuration ===")
@@ -503,9 +504,9 @@ def test_execute_generated_multi_shot(
                 f"No more input values available. Program requested input with prompt: '{prompt}'"
             )
 
-        try:
-            # print("test_execute_generated_multi_shot 110")
-            mamba_execute(
+        def run_mamba_execution():
+            """Wrapper function to run mamba execution"""
+            return mamba_execute(
                 source=generated_program,
                 output_handler=collect_output_handler,
                 input_handler=mock_input_handler,
@@ -513,7 +514,26 @@ def test_execute_generated_multi_shot(
                 random_seed=mamba_execution_seed,
                 random_seed_was_set=True,
             )
+
+        try:
+            # print("test_execute_generated_multi_shot 110")
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(run_mamba_execution)
+                future.result(timeout=30)  # 30 seconds timeout
             # print("test_execute_generated_multi_shot 120")
+        except concurrent.futures.TimeoutError:
+            if shot == num_shots - 1:  # Last attempt
+                detailed_test_logger.debug("--")
+                error_string = f"E008 Mamba execution timed out after 30 seconds for Problem-{problem_id}"
+                detailed_test_logger.debug(error_string)
+                pytest.fail(error_string)
+            # Add guidance and continue to next shot
+            guidance = "Your program took too long to execute (>30 seconds). Please provide a more efficient solution."
+            conversation_history.append({"role": "user", "content": guidance})
+            detailed_test_logger.debug("--")
+            detailed_test_logger.debug(f"Guidance: {guidance}")
+            reset_mamba_state()
+            continue
         except Exception as e:
             # print("test_execute_generated_multi_shot 130")
             if shot == num_shots - 1:  # Last attempt
