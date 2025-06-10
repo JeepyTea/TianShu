@@ -331,7 +331,7 @@ def test_execute_generated_multi_shot(
     try:
         client = registry.get_client(llm_identifier, **LLM_PARAMS)
     except ValueError as e:
-        pytest.x fail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
+        pytest.xfail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
 
     # Log LLM configuration details
     detailed_test_logger.debug("=== LLM Configuration ===")
@@ -602,7 +602,7 @@ def test_execute_generated_multi_shot(
                 detailed_test_logger.debug("Error: E006")
             assert full_stdout == expected_output, (
                 f"E006 Problem-{problem_id}, problem '{problem_name}' in: '{input_value}' "
-                f"seed: {mamba_execution_seed} "
+                f"seed: {mamba_execution_seed}  "
                 f"Shot: {shot+1}\n"
                 f"Expected output '{expected_output}', but got '{full_stdout}'.\n"
                 f"Program was:\n{generated_program}\n"
