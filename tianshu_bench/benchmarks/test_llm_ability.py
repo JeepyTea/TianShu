@@ -92,12 +92,16 @@ LLM_IDENTIFIERS = [
     "chutes/deepseek-ai/DeepSeek-R1-0528",
     "chutes/deepseek-ai/DeepSeek-R1",
     #"chutes/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
-    "chutes/Qwen/Qwen3-235B-A22B",
-    "chutes/Qwen/Qwen3-30B-A3B",
-    "chutes/Qwen/Qwen3-14B",
+    #"chutes/Qwen/Qwen3-235B-A22B",
+    #"chutes/Qwen/Qwen3-30B-A3B",
+    #"chutes/Qwen/Qwen3-14B",
     # "chutes/THUDM/GLM-4-32B-0414",
-    "chutes/chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
-    "chutes/chutesai/Llama-4-Scout-17B-16E-Instruct",
+    #"chutes/chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    #"chutes/chutesai/Llama-4-Scout-17B-16E-Instruct",
+    "nvidia/meta/llama-4-maverick-17b-128e-instruct",
+    "nvidia/meta/llama-4-scout-17b-16e-instruct",
+    "nvidia/qwen/qwen3-235b-a22b",
+    #"nvidia/google/gemma-3-27b-it",
     # "sambanova/DeepSeek-R1",
     # "sambanova/DeepSeek-V3-0324",
     # "sambanova/Llama-4-Maverick-17B-128E-Instruct",
@@ -105,8 +109,6 @@ LLM_IDENTIFIERS = [
 
 # Default LLM parameters
 LLM_PARAMS = {
-    "temperature": 0.1,
-    "top_p": 0.1,
 }
 
 
@@ -302,20 +304,10 @@ def test_generated_program_with_mamba_execution(llm_identifier, mamba_execution_
     )
 
 
-# Define LLMs to skip for multi-shot testing
-SKIP_LLMS = [
-    "chutes/chutesai/Llama-4-Maverick-17B-128E-Instruct-FP8",
-    "chutes/chutesai/Llama-4-Scout-17B-16E-Instruct"
-]
-
 @pytest.mark.parametrize("test_case", load_problem_definitions())
 @pytest.mark.parametrize("mamba_execution_seed", range(1, 11))
 @pytest.mark.parametrize("num_shots", [1, 2, 4, 8])
-@pytest.mark.parametrize("llm_identifier", [
-    pytest.param(llm, marks=pytest.mark.skip(reason=f"Skipping multi-shot test for {llm}"))
-    if llm in SKIP_LLMS else llm
-    for llm in LLM_IDENTIFIERS
-])
+@pytest.mark.parametrize("llm_identifier", [llm for llm in LLM_IDENTIFIERS])
 def test_execute_generated_multi_shot(
         llm_identifier, mamba_execution_seed,
         test_case, num_shots, detailed_test_logger
@@ -333,7 +325,7 @@ def test_execute_generated_multi_shot(
     try:
         client = registry.get_client(llm_identifier, **LLM_PARAMS)
     except ValueError as e:
-        pytest.xfail(f"Skipping test for {llm_identifier}: {str(e)}")
+        pytest.xfail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
 
     problem_name = test_case["name"]
     problem_id = test_case["id"]
