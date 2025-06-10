@@ -327,6 +327,38 @@ def test_execute_generated_multi_shot(
     except ValueError as e:
         pytest.xfail(f"Error when looking up client in the registry. Skipping test for {llm_identifier}: {str(e)}")
 
+    # Log LLM configuration details
+    detailed_test_logger.debug("=== LLM Configuration ===")
+    detailed_test_logger.debug(f"LLM Identifier: {llm_identifier}")
+    detailed_test_logger.debug(f"Client Class: {client.__class__.__name__}")
+    detailed_test_logger.debug(f"Model: {getattr(client, 'model', 'N/A')}")
+    detailed_test_logger.debug(f"Temperature: {getattr(client, 'temperature', 'N/A')}")
+    detailed_test_logger.debug(f"Max Tokens: {getattr(client, 'max_tokens', 'N/A')}")
+    detailed_test_logger.debug(f"Context Length: {getattr(client, 'context_length', 'N/A')}")
+    detailed_test_logger.debug(f"Top P: {getattr(client, 'top_p', 'N/A')}")
+    detailed_test_logger.debug(f"Frequency Penalty: {getattr(client, 'frequency_penalty', 'N/A')}")
+    detailed_test_logger.debug(f"Presence Penalty: {getattr(client, 'presence_penalty', 'N/A')}")
+    detailed_test_logger.debug(f"Extra Body: {getattr(client, 'extra_body', 'N/A')}")
+    detailed_test_logger.debug(f"Base URL: {getattr(client, 'base_url', 'N/A')}")
+    detailed_test_logger.debug(f"Timeout: {getattr(client, 'timeout', 'N/A')}")
+    detailed_test_logger.debug(f"Full Config: {getattr(client, 'config', {})}")
+    detailed_test_logger.debug(f"LLM_PARAMS: {LLM_PARAMS}")
+    detailed_test_logger.debug("========================")
+
+    # Add Allure custom labels for LLM configuration
+    allure.dynamic.label("llm_identifier", llm_identifier)
+    allure.dynamic.label("client_class", client.__class__.__name__)
+    allure.dynamic.label("model", str(getattr(client, 'model', 'N/A')))
+    allure.dynamic.label("temperature", str(getattr(client, 'temperature', 'N/A')))
+    allure.dynamic.label("max_tokens", str(getattr(client, 'max_tokens', 'N/A')))
+    allure.dynamic.label("context_length", str(getattr(client, 'context_length', 'N/A')))
+    allure.dynamic.label("top_p", str(getattr(client, 'top_p', 'N/A')))
+    allure.dynamic.label("frequency_penalty", str(getattr(client, 'frequency_penalty', 'N/A')))
+    allure.dynamic.label("presence_penalty", str(getattr(client, 'presence_penalty', 'N/A')))
+    allure.dynamic.label("extra_body", str(getattr(client, 'extra_body', 'N/A')))
+    allure.dynamic.label("base_url", str(getattr(client, 'base_url', 'N/A')))
+    allure.dynamic.label("timeout", str(getattr(client, 'timeout', 'N/A')))
+
     problem_name = test_case["name"]
     problem_id = test_case["id"]
     input_value = test_case["input"]
