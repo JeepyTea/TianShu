@@ -101,6 +101,11 @@ LLM_IDENTIFIERS = [
     "nvidia/meta/llama-4-maverick-17b-128e-instruct",
     "nvidia/meta/llama-4-scout-17b-16e-instruct",
     "nvidia/qwen/qwen3-235b-a22b",
+    # "nvidia/qwen/qwq-32b", #SLow response
+    "nvidia/deepseek-ai/deepseek-r1",
+    "nvidia/deepseek-ai/deepseek-r1-0528",
+    "nvidia/deepseek-ai/deepseek-r1-distill-qwen-32b",
+    "nvidia/microsoft/phi-4-mini-instruct",
     #"nvidia/google/gemma-3-27b-it",
     # "sambanova/DeepSeek-R1",
     # "sambanova/DeepSeek-V3-0324",
@@ -465,7 +470,6 @@ def test_execute_generated_multi_shot(
         reset_mamba_state()  # Ensure Mamba state is clean
         mamba.apply_random_keywords(mamba_execution_seed)
         output_log: List[Tuple[str, str]] = []
-        print("test_execute_generated_multi_shot 90")
 
         # Parse the input string into a list of values
         input_values = test_case["input"].split(",") if test_case["input"] else []
@@ -514,14 +518,14 @@ def test_execute_generated_multi_shot(
             # print("test_execute_generated_multi_shot 130")
             if shot == num_shots - 1:  # Last attempt
                 detailed_test_logger.debug("--")
-                detailed_test_logger.debug("Error: E004")
-                pytest.fail(
-                    f"E004 Mamba execution failed for Problem-{problem_id}, test case '{input_value}' with exception: {e}\n"
+                
+                error_string = (f"E004 Mamba execution failed for Problem-{problem_id}, test case '{input_value}' with exception: {e}\n"
                     f"seed: {mamba_execution_seed} \n"
                     f"Shot: {shot+1}\n"
                     f"Program was:\n{generated_program}\n"
-                    f"Output log: {output_log}"
-                )
+                    f"Output log: {output_log}")
+                detailed_test_logger.debug(error_string)
+                pytest.fail(error_string)
             # Add guidance and continue to next shot
             guidance = (
                 f"Your program failed with error: {str(e)}. Please fix the issue and try again."
@@ -538,17 +542,16 @@ def test_execute_generated_multi_shot(
         stderr_messages = [msg for stream, msg in output_log if stream == "stderr"]
         if stderr_messages:
             if shot == num_shots - 1:  # Last attempt
-                detailed_test_logger.debug("--")
-                detailed_test_logger.debug("Error: E005")
-                pytest.fail(
-                    f"E005 Problem-{problem_id}, problem '{problem_name}' test case in: '{input_value}' "
+                error_string = (f"Error: E005 Problem-{problem_id}, problem '{problem_name}' test case in: '{input_value}' "
                     f"seed: {mamba_execution_seed} \n"
                     f"Shot: {shot+1}\n"
                     f"Expected output '{expected_output}', but got stderr output \n"
                     f"'{''.join(stderr_messages)}'.\n"
                     f"Program was:\n{generated_program}\n"
-                    f"Full Mamba output log: {output_log}"
-                )
+                    f"Full Mamba output log: {output_log}")
+                detailed_test_logger.debug("--")
+                detailed_test_logger.debug(f"{error_string}")
+                pytest.fail(f"{error_string}")
             # Add guidance and continue to next shot
             # print("test_execute_generated_multi_shot 160")
             guidance = f"Your program produced errors: {''.join(stderr_messages)}. Please fix the issues and try again."
@@ -569,6 +572,7 @@ def test_execute_generated_multi_shot(
             # Success! Break out of the loop
             detailed_test_logger.debug("--")
             detailed_test_logger.debug("🟢 Program output was correct!")
+            detailed_test_logger.debug(f"🟢 Test completed in {shot+1} shots")
             reset_mamba_state()  # Clean up Mamba state after execution
             return
 
