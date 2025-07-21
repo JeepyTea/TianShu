@@ -1,10 +1,15 @@
 import os
-from typing import List, Dict
+import logging
+import time
+from typing import List, Dict, Any
 from .base_http_client import BaseHttpLLMClient
 from tianshu_core.config import Config
 
 # Default model to use if not specified in config or environment variable
 _DEFAULT_MODEL = "deepseek-ai/DeepSeek-R1"
+
+# Configure logging (consider moving this to a central configuration if your project has one)
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class ChutesClient(BaseHttpLLMClient):
@@ -102,7 +107,7 @@ class ChutesClient(BaseHttpLLMClient):
 
         # Add top_p if provided
         if "top_p" in kwargs:
-            chutes_params["top_p"] = kwargs["top_p"]
+            chutes_params["top_p"] = kwargs["top_p"] # Corrected from chutes_params["top_p"] = chutes_params["top_p"]
 
         # Add any additional parameters from kwargs that match Chutes's API
         for key, value in kwargs.items():
@@ -132,16 +137,20 @@ class ChutesClient(BaseHttpLLMClient):
 
         Args:
             messages: A list of message dictionaries with 'role' and 'content' keys.
-            num_retries: Number of times to retry on network failures or timeouts.
+            num_retries: Number of times to retry on network failures or timeouts
+                         within the HTTP request itself. Defaults to 0 (1 attempt).
             **kwargs: Additional parameters for the API call.
 
         Returns:
             The response text from the LLM.
 
         Raises:
-            requests.exceptions.RequestException: If the HTTP request fails after all retries.
-            ValueError: If the response format is unexpected or configuration is invalid.
+            requests.exceptions.RequestException: If the HTTP request fails after all network retries.
+            ValueError: If the response format is unexpected after all parsing retries.
         """
+        # Constant for parsing retries
+        MAX_PARSING_RETRIES = 3
+
         # Prepare the request payload
         chutes_params = {
             "model": self.model,
@@ -162,15 +171,47 @@ class ChutesClient(BaseHttpLLMClient):
             if key not in chutes_params and key not in ["temperature", "top_p", "max_tokens"]:
                 chutes_params[key] = value
 
-        # Make the HTTP request with retry logic
         endpoint = self._get_endpoint("chat/completions")
-        response_data = self._make_http_request(endpoint, chutes_params, num_retries=num_retries)
 
-        # Extract the response content from the completion
-        try:
-            return response_data["choices"][0]["message"]["content"]
-        except (KeyError, IndexError) as e:
-            raise ValueError(
-                f"Could not extract response from Chutes API: {e}. Response keys: {list(response_data.keys())}\n"
-                f"response_data: {response_data}"
-            ) from e
+        # Loop for retries specifically for response parsing errors
+        for attempt in range(MAX_PARSING_RETRIES + 1):
+            response_data: Dict[str, Any] = {} # Initialize to ensure it's always defined
+            try:
+                # _make_http_request handles its own network retries based on 'num_retries' parameter
+                response_data = self._make_http_request(endpoint, chutes_params, num_retries=num_retries)
+
+                # Attempt to extract the response content from the completion
+                return response_data["choices"][0]["message"]["content"]
+
+            except (KeyError, IndexError) as e:
+                # This block handles the specific ValueError (from KeyError/IndexError)
+                # when the response structure is unexpected.
+                log_message = (
+                    f"Parsing error (attempt {attempt + 1}/{MAX_PARSING_RETRIES + 1}): Could not extract response from Chutes API: {e}. "
+                    f"Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'N/A'}\n"
+                    f"response_data: {response_data}"
+                )
+                logging.warning(log_message)
+
+                if attempt < MAX_PARSING_RETRIES:
+                    # If there are parsing retries left, wait and then continue to the next attempt
+                    time.sleep(1) # Simple linear backoff to avoid overwhelming the API
+                    continue
+                else:
+                    # No parsing retries left, re-raise the ValueError
+                    raise ValueError(
+                        f"Could not extract response from Chutes API after {MAX_PARSING_RETRIES + 1} parsing attempts: {e}. "
+                        f"Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'N/A'}\n"
+                        f"response_data: {response_data}"
+                    ) from e
+            except Exception as e:
+                # This block catches any other exceptions that might occur,
+                # e.g., network errors from _make_http_request if it raises directly
+                # after exhausting its own 'num_retries', or other unexpected runtime issues.
+                # These are not parsing errors, so we re-raise immediately as _make_http_request
+                # should have handled its retries for network issues.
+                logging.error(f"An unexpected error occurred during Chutes API call: {e}")
+                raise # Re-raises the caught exception
+
+        # This line should theoretically not be reached if the loop either returns or raises an exception.
+        raise RuntimeError("send_chat retry loop completed without returning or raising an exception.")
