@@ -37,24 +37,35 @@ def normalize_nodeid(nodeid, full_test_path=None):
 def load_executed_nodeids(log_file_paths):
     """Load executed test nodeids from pytest JSON log files."""
     executed_nodeids = set()
+    skipped_count = 0
     
     for log_file_path in log_file_paths:
         print(f"Processing log file: {log_file_path}")
         try:
             with open(log_file_path, 'r') as f:
-                file_nodeids = set()
+                file_executed_nodeids = set()
+                file_skipped_count = 0
                 for line in f:
                     try:
                         entry = json.loads(line.strip())
                         if (entry.get('$report_type') == 'TestReport' and 
                             'nodeid' in entry and 
                             entry.get('when') == 'call'):
-                            file_nodeids.add(entry['nodeid'])
+                            outcome = entry.get('outcome')
+                            nodeid = entry['nodeid']
+                            
+                            if outcome == 'skipped':
+                                file_skipped_count += 1
+                                # Skipped tests are still considered "executed" (not missing)
+                                file_executed_nodeids.add(nodeid)
+                            else:  # 'passed' or 'failed'
+                                file_executed_nodeids.add(nodeid)
                     except json.JSONDecodeError:
                         continue
                 
-                print(f"  Found {len(file_nodeids)} executed tests in {log_file_path}")
-                executed_nodeids.update(file_nodeids)
+                print(f"  Found {len(file_executed_nodeids)} executed tests and {file_skipped_count} skipped tests in {log_file_path}")
+                executed_nodeids.update(file_executed_nodeids)
+                skipped_count += file_skipped_count
                 
         except FileNotFoundError:
             print(f"Error: Log file '{log_file_path}' not found.")
@@ -63,7 +74,7 @@ def load_executed_nodeids(log_file_paths):
             print(f"Error reading log file '{log_file_path}': {e}")
             sys.exit(1)
     
-    return executed_nodeids
+    return executed_nodeids, skipped_count
 
 
 def get_expected_nodeids(test_path, filter_expression=None):
@@ -242,7 +253,7 @@ Examples:
     for log_file in args.log_files:
         print(f"  - {log_file}")
     
-    executed_nodeids = load_executed_nodeids(args.log_files)
+    executed_nodeids, skipped_count = load_executed_nodeids(args.log_files)
     print(f"Found {len(executed_nodeids)} total executed tests across all files")
     
     # Get expected tests
@@ -287,6 +298,7 @@ Examples:
     print(f"\n=== RESULTS ===")
     print(f"Expected tests: {len(expected_nodeids)}")
     print(f"Executed tests: {len(executed_nodeids)}")
+    print(f"Skipped tests: {skipped_count}")
     print(f"Missing tests: {len(missing_nodeids)}")
     
 
