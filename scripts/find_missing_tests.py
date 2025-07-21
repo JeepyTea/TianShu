@@ -34,7 +34,7 @@ def normalize_nodeid(nodeid, full_test_path=None):
     return nodeid
 
 
-def load_executed_nodeids(log_file_paths):
+def load_executed_nodeids(log_file_paths, include_skipped_as_missing=False):
     """Load executed test nodeids from pytest JSON log files."""
     executed_nodeids = set()
     skipped_count = 0
@@ -56,8 +56,9 @@ def load_executed_nodeids(log_file_paths):
                             
                             if outcome == 'skipped':
                                 file_skipped_count += 1
-                                # Skipped tests are still considered "executed" (not missing)
-                                file_executed_nodeids.add(nodeid)
+                                # Only add to executed if we're NOT including skipped as missing
+                                if not include_skipped_as_missing:
+                                    file_executed_nodeids.add(nodeid)
                             else:  # 'passed' or 'failed'
                                 file_executed_nodeids.add(nodeid)
                     except json.JSONDecodeError:
@@ -246,6 +247,12 @@ Examples:
         help='Show debug information about nodeid matching'
     )
     
+    parser.add_argument(
+        '--include-skipped',
+        action='store_true',
+        help='Include skipped tests as missing tests instead of executed tests'
+    )
+    
     args = parser.parse_args()
     
     # Load executed tests from log files
@@ -253,7 +260,7 @@ Examples:
     for log_file in args.log_files:
         print(f"  - {log_file}")
     
-    executed_nodeids, skipped_count = load_executed_nodeids(args.log_files)
+    executed_nodeids, skipped_count = load_executed_nodeids(args.log_files, args.include_skipped)
     print(f"Found {len(executed_nodeids)} total executed tests across all files")
     
     # Get expected tests
