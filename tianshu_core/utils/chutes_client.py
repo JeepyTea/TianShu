@@ -171,5 +171,6 @@ class ChutesClient(BaseHttpLLMClient):
             return response_data["choices"][0]["message"]["content"]
         except (KeyError, IndexError) as e:
             raise ValueError(
-                f"Could not extract response from Chutes API: {e}. Response keys: {list(response_data.keys())}"
+                f"Could not extract response from Chutes API: {e}. Response keys: {list(response_data.keys())}\n"
+                f"response_data: {response_data}"
             ) from e
