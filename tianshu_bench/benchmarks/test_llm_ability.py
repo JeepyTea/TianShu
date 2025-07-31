@@ -92,6 +92,7 @@ LLM_IDENTIFIERS = [
     "chutes/deepseek-ai/DeepSeek-V3-0324",
     "chutes/deepseek-ai/DeepSeek-R1-0528",
     "chutes/deepseek-ai/DeepSeek-R1",
+    "chutes/moonshotai/Kimi-K2-Instruct",
     #"chutes/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
     #"chutes/Qwen/Qwen3-235B-A22B",
     #"chutes/Qwen/Qwen3-30B-A3B",
@@ -407,7 +408,7 @@ def test_execute_generated_multi_shot(
             try:
                 # print("test_execute_generated_multi_shot 60 about to send chat request")
                 llm_response_text = client.send_chat(
-                    conversation_history, num_retries=5, **LLM_PARAMS
+                    conversation_history, num_retries=7, **LLM_PARAMS
                 )
                 detailed_test_logger.debug("--")
                 detailed_test_logger.debug(f"LLM response: {llm_response_text}")
@@ -589,7 +590,7 @@ def test_execute_generated_multi_shot(
 
         # print("test_execute_generated_multi_shot 170")
         if full_stdout == expected_output:
-            # Success! Break out of the loop
+            # Test Success! Break out of the loop
             detailed_test_logger.debug("--")
             detailed_test_logger.debug("🟢 Program output was correct!")
             detailed_test_logger.debug(f"🟢 Test completed in {shot+1} shots")

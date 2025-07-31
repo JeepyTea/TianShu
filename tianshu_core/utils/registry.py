@@ -65,7 +65,7 @@ class LLMRegistry:
     def _register_chutes_models(self):
         """Register predefined Chutes models."""
         chutes_models = [
-            ("deepseek-ai/DeepSeek-R1", {"context_length": 128000, "temperature": 0.7}),
+            ("deepseek-ai/DeepSeek-R1", {"context_length": 128000, "temperature": 0.6, "top_p": 0.7}),
             ("deepseek-ai/DeepSeek-V3-0324", {"context_length": 128000, "temperature": 0.7}),
             ("deepseek-ai/DeepSeek-R1-0528", {"context_length": 128000, "temperature": 0.7}),
             ("ddeepseek-ai/DeepSeek-R1-0528-Qwen3-8B", {"context_length": 128000, "temperature": 0.7}),
@@ -78,6 +78,7 @@ class LLMRegistry:
             ("unsloth/gemma-3-27b-it", {"context_length": 32000, "temperature": 0.7}),
             ("meta-llama/Llama-3-70B-Instruct", {"context_length": 32000, "temperature": 0.7}),
             ("mistralai/Mistral-7B-Instruct-v0.2", {"context_length": 32000, "temperature": 0.7}),
+            ("moonshotai/Kimi-K2-Instruct", {"context_length": 58000, "temperature": 0.7}),
         ]
 
         for model_info in chutes_models:
@@ -93,10 +94,15 @@ class LLMRegistry:
     def _register_nvidia_models(self):
         """Register predefined NVIDIA models."""
         nvidia_models = [
-            ("meta/llama-4-maverick-17b-128e-instruct", {"context_length": 128000, "max_tokens": 512, "temperature": 0.7}),
-            ("google/gemma-7b", {"context_length": 8192, "max_tokens": 512, "temperature": 0.7}),
-            ("mistralai/mixtral-8x7b-instruct-v0.1", {"context_length": 32768, "max_tokens": 512, "temperature": 0.7}),
-            ("nvidia/nemotron-4-340b-instruct", {"context_length": 128000, "max_tokens": 512, "temperature": 0.7}),
+            ("meta/llama-4-maverick-17b-128e-instruct", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.7}),
+            ("meta/llama-4-scout-17b-16e-instruct", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.7}),
+            ("qwen/qwen3-235b-a22b", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.2, "top_p":0.7, "extra_body": {"chat_template_kwargs": {"thinking":True}}}),
+            ("qwen/qwq-32b", {"context_length": 32000, "max_tokens": 32000, "temperature": 0.6, "top_p": 0.7}),
+            ("deepseek-ai/deepseek-r1-0528", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.7}),
+            ("deepseek-ai/deepseek-r1-distill-qwen-32b", {"context_length": 32000, "max_tokens": 32000, "temperature": 0.6, "top_p": 0.7}),
+            ("deepseek-ai/deepseek-r1", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.6, "top_p": 0.7}),
+            ("microsoft/phi-4-mini-instruct", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.1, "top_p": 0.6}),
+            
         ]
 
         for model_info in nvidia_models:

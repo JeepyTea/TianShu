@@ -55,7 +55,7 @@ class BaseHttpLLMClient(BaseLLMClient):
             requests.exceptions.RequestException: If the HTTP request fails after all retries.
             ValueError: If the response cannot be parsed as JSON.
         """
-        current_num_retries = num_retries  # we may get more retries under certain circumstances
+        current_max_retries = num_retries  # we may get more retries under certain circumstances
         headers = headers or self.headers
         retry_count = 0
         delay = 1  # Start with 1 second delay
@@ -70,7 +70,7 @@ class BaseHttpLLMClient(BaseLLMClient):
                     endpoint,
                     headers=headers,
                     json=payload,
-                    timeout=self.timeout,
+                    timeout=(self.timeout,self.timeout)
                 )
                 print(
                     f"🔴_make_http_request Response text: {response.text[:1200]}..."
@@ -101,10 +101,10 @@ class BaseHttpLLMClient(BaseLLMClient):
                     # interpreter, so set the seed to the system time.
                     random.seed(datetime.now().timestamp())
                     time.sleep(10 + 30*random.random())
-                    current_num_retries += 4
+                    current_max_retries += 4
                     delay = 20
                 retry_count += 1
-                if retry_count > current_num_retries:
+                if retry_count > current_max_retries:
                     error_detail = ""
                     if hasattr(e, "response") and e.response is not None:
                         try:
@@ -121,10 +121,10 @@ class BaseHttpLLMClient(BaseLLMClient):
                             )
                             error_detail = f" Status Code: {e.response.status_code}. Response: {e.response.text[:200]}..."
                     print(
-                        f" _make_http_request HTTP request failed after {current_num_retries} retries: {e}{error_detail}"
+                        f" _make_http_request HTTP request failed after {current_max_retries} retries: {e}{error_detail}"
                     )
                     raise requests.exceptions.RequestException(
-                        f"HTTP request failed after {current_num_retries} retries: {e}{error_detail}"
+                        f"EH001 HTTP request (timeout: {self.timeout}) failed after {current_max_retries} retries: {e}{error_detail}"
                     ) from e
 
                 # Exponential backoff with tripling delay

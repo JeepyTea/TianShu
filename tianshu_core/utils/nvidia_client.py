@@ -59,6 +59,9 @@ class NvidiaClient(BaseHttpLLMClient):
         self.top_p = self.config.get("top_p")
         self.frequency_penalty = self.config.get("frequency_penalty")
         self.presence_penalty = self.config.get("presence_penalty")
+        self.extra_body = self.config.get("extra_body")
+        #  print(f"got extra body: {self.extra_body}")
+        #  print(f"got config : {self.config}")  # Careful with this, as it prints the API security token
 
         # Add authorization header if token is provided
         if self.api_token:
@@ -139,9 +142,12 @@ class NvidiaClient(BaseHttpLLMClient):
             "max_tokens": kwargs.get("max_tokens", self.max_tokens),
             "top_p": kwargs.get("top_p", self.top_p),
             "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
-            "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
+            "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),            
             "stream": False,  # We want the complete response, not streaming
         }
+
+        if kwargs.get("extra_body", self.extra_body):
+            nvidia_params["extra_body"] = kwargs.get("extra_body", self.extra_body)
 
         # Add any additional parameters from kwargs that match NVIDIA's API
         # Ensure we don't overwrite parameters already set from defaults or explicit kwargs
@@ -152,8 +158,11 @@ class NvidiaClient(BaseHttpLLMClient):
                 "top_p",
                 "frequency_penalty",
                 "presence_penalty",
+                "extra_body",
             ]:
+                print(f"Got extra key:{key} value {value}")
                 nvidia_params[key] = value
+        print(f"nvidia Print params: {nvidia_params}")
 
         # Make the HTTP request with retry logic
         endpoint = self._get_endpoint("chat/completions")
