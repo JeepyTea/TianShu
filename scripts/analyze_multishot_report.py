@@ -198,7 +198,8 @@ def print_stats(stats):
         print(f"Seed {seed}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total")
 
     print("\n=== Statistics by Test Case ===")
-    for test_case, data in sorted(stats["by_test_case"].items()):
+    # Extract numeric part from test_case string for proper numerical sorting
+    for test_case, data in sorted(stats["by_test_case"].items(), key=lambda x: int(x[0].replace('test_case', '')) if x[0].startswith('test_case') and x[0][9:].isdigit() else float('inf')):
         print(f"{test_case}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
 
     print("\n=== Statistics by Problem ===")
