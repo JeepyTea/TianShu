@@ -16,6 +16,7 @@ import pprint
 
 import random
 from typing import Callable, Optional  # Added for typing
+from datetime import datetime, timedelta  
 
 
 # Define a type alias for the handler
@@ -83,6 +84,7 @@ def execute(
     random_seed_was_set: bool = False,
     output_handler: OutputHandlerType = None,
     input_handler: Optional[Callable[[str], str]] = None,
+    max_execution_time_seconds = None,
 ):  # New parameter
 
     p.disable_warnings = disable_warnings
@@ -92,6 +94,9 @@ def execute(
     original_input_handler = mamba.ast.get_input_handler()
     mamba.ast.set_output_handler(output_handler)
     mamba.ast.set_input_handler(input_handler)
+
+    if max_execution_time_seconds:
+        end_time = datetime.now() + timedelta(seconds=max_execution_time_seconds)   
 
     try:
         # Keyword override logic is now handled in mamba.py before this function is called.
