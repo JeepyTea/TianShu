@@ -45,6 +45,11 @@ def main():
         action="store_true",
         help="Generate documentation with current keywords based on seed and exit.",
     )
+    parser.add_argument(
+        "--max-execution-time",
+        type=int,
+        help="Maximum execution time in seconds before timeout (default: no limit)."
+    )
 
     args = parser.parse_args()
 
@@ -167,6 +172,7 @@ def main():
             disable_warnings=args.disable_warnings,
             random_seed=args.random_seed,
             random_seed_was_set=random_seed_was_set,
+            max_execution_time_seconds=args.max_execution_time,
             # No longer pass keywords here
         )
     except FileNotFoundError:

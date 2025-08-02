@@ -3,6 +3,7 @@ from types import LambdaType
 from mamba.exceptions import *
 import mamba.symbol_table
 from typing import Callable, Optional  # Added
+from datetime import datetime
 
 # --- Add module-level storage for the handlers ---
 _current_output_handler: Optional[Callable[[str, str], None]] = None
@@ -33,6 +34,16 @@ def get_input_handler() -> Optional[Callable[[str], str]]:
     return _current_input_handler
 
 
+def check_execution_timeout():
+    """Checks if execution has timed out and raises exception if so."""
+    try:
+        end_time = symbols.get_sym("__timeout_end__")
+        if end_time and datetime.now() > end_time:
+            raise InterpreterRuntimeError("Execution timeout exceeded")
+    except SymbolNotFound:
+        pass  # No timeout set
+
+
 # --- End handlers storage ---
 
 symbols = mamba.symbol_table.SymbolTable()
@@ -59,9 +70,10 @@ class InstructionList:
         of their eval method in a list or returns an ExitStatement
         in case one is found
         """
-
+        check_execution_timeout()
         ret = []
         for n in self:
+            check_execution_timeout()
             if isinstance(n, ExitStatement):
                 return n
 
@@ -372,6 +384,7 @@ class For(BaseExpression):
             sign = -1
 
         for i in range(lo, hi, sign):
+            check_execution_timeout()
             self.variable.assign(i)
 
             # in case of exit statement prematurely break the loop
@@ -392,6 +405,7 @@ class ForIn(BaseExpression):
 
     def eval(self):
         for i in self.sequence.eval():
+            check_execution_timeout()
             self.variable.assign(i)
             if isinstance(self.body.eval(), ExitStatement):
                 break
@@ -407,6 +421,7 @@ class While(BaseExpression):
 
     def eval(self):
         while self.condition.eval():
+            check_execution_timeout()
             if isinstance(self.body.eval(), ExitStatement):
                 break
 
@@ -440,6 +455,7 @@ class FunctionCall(BaseExpression):
         return "<Function call name={0} params={1}>".format(self.name, self.params)
 
     def __eval_builtin_func(self):
+        check_execution_timeout()
         func = self.name.eval()
         args = []
 
@@ -449,6 +465,7 @@ class FunctionCall(BaseExpression):
         return func.eval(args)
 
     def __eval_udf(self):
+        check_execution_timeout()
         func = self.name.eval()
         args = {}
 

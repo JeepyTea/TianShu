@@ -95,10 +95,12 @@ def execute(
     mamba.ast.set_output_handler(output_handler)
     mamba.ast.set_input_handler(input_handler)
 
-    if max_execution_time_seconds:
-        end_time = datetime.now() + timedelta(seconds=max_execution_time_seconds)   
-
     try:
+        # Set timeout in symbol table if specified
+        if max_execution_time_seconds:
+            end_time = datetime.now() + timedelta(seconds=max_execution_time_seconds)
+            mamba.ast.symbols.set_sym("__timeout_end__", end_time)
+
         # Keyword override logic is now handled in mamba.py before this function is called.
         # If embedding, the caller needs to handle keyword setup *before* calling execute.
 
@@ -136,6 +138,11 @@ def execute(
         if not disable_warnings:
             raise e  # Re-raise if warnings (and thus detailed exceptions) are enabled
     finally:
+        # Clean up timeout symbol
+        try:
+            mamba.ast.symbols.set_sym("__timeout_end__", None)
+        except:
+            pass
         # Ensure the handlers are reset even if errors occur
         mamba.ast.set_output_handler(original_output_handler)
         mamba.ast.set_input_handler(original_input_handler)
