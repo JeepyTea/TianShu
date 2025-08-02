@@ -22,7 +22,7 @@ def load_problem_definitions():
     return problem_map
 
 def load_test_case_to_problem_mapping():
-    """Load mapping from test case numbers to problem IDs and names."""
+    """Load mapping from test case numbers to problem IDs, names, and difficulty."""
     test_case_map = {}
     project_root = Path(__file__).parent.parent
     csv_path = project_root / "datasets" / "tianshu_v1" / "problem_definitions.csv"
@@ -32,7 +32,8 @@ def load_test_case_to_problem_mapping():
         for i, row in enumerate(reader):
             test_case_map[f"test_case{i}"] = {
                 "problem_id": row["problem_id"],
-                "problem_name": row["problem_name"]
+                "problem_name": row["problem_name"],
+                "difficulty": row["difficulty"]
             }
 
     return test_case_map
@@ -55,6 +56,7 @@ def analyze_multishot_report(log_files):
 
     # Initialize statistics containers
     stats_by_model = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
+    stats_by_model_difficulty = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
     stats_by_shots = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
     stats_by_seed = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
     stats_by_test_case = defaultdict(lambda: {"total": 0, "passed": 0, "failed": 0, "skipped": 0})
@@ -100,15 +102,18 @@ def analyze_multishot_report(log_files):
                                     # Everything before that is the model name
                                     model_name = '-'.join(parts[:-3])
 
-                                    # Get problem ID and name from test case mapping
+                                    # Get problem ID, name, and difficulty from test case mapping
                                     if test_case in test_case_mapping:
                                         problem_id = test_case_mapping[test_case]["problem_id"]
                                         problem_name = test_case_mapping[test_case]["problem_name"]
+                                        difficulty = test_case_mapping[test_case]["difficulty"]
                                     else:
                                         problem_id = "unknown"
                                         problem_name = "Unknown Problem"
+                                        difficulty = "unknown"
 
                                     problem_key = f"{problem_id}: {problem_name}"
+                                    model_difficulty_key = f"{model_name} (Difficulty {difficulty})"
 
                                     # Determine if the test passed or failed
                                     outcome = entry.get('outcome', 'unknown')
@@ -124,6 +129,7 @@ def analyze_multishot_report(log_files):
 
                                     # Update statistics
                                     stats_by_model[model_name]["total"] += 1
+                                    stats_by_model_difficulty[model_difficulty_key]["total"] += 1
                                     stats_by_shots[shots]["total"] += 1
                                     stats_by_seed[seed]["total"] += 1
                                     stats_by_test_case[test_case]["total"] += 1
@@ -131,18 +137,21 @@ def analyze_multishot_report(log_files):
 
                                     if outcome == 'passed':
                                         stats_by_model[model_name]["passed"] += 1
+                                        stats_by_model_difficulty[model_difficulty_key]["passed"] += 1
                                         stats_by_shots[shots]["passed"] += 1
                                         stats_by_seed[seed]["passed"] += 1
                                         stats_by_test_case[test_case]["passed"] += 1
                                         stats_by_problem[problem_key]["passed"] += 1
                                     elif outcome == 'failed':
                                         stats_by_model[model_name]["failed"] += 1
+                                        stats_by_model_difficulty[model_difficulty_key]["failed"] += 1
                                         stats_by_shots[shots]["failed"] += 1
                                         stats_by_seed[seed]["failed"] += 1
                                         stats_by_test_case[test_case]["failed"] += 1
                                         stats_by_problem[problem_key]["failed"] += 1
                                     elif outcome == 'skipped':
                                         stats_by_model[model_name]["skipped"] += 1
+                                        stats_by_model_difficulty[model_difficulty_key]["skipped"] += 1
                                         stats_by_shots[shots]["skipped"] += 1
                                         stats_by_seed[seed]["skipped"] += 1
                                         stats_by_test_case[test_case]["skipped"] += 1
@@ -165,7 +174,7 @@ def analyze_multishot_report(log_files):
             continue
 
     # Calculate success rates
-    for stats_dict in [stats_by_model, stats_by_shots, stats_by_seed, stats_by_test_case, stats_by_problem]:
+    for stats_dict in [stats_by_model, stats_by_model_difficulty, stats_by_shots, stats_by_seed, stats_by_test_case, stats_by_problem]:
         for key, value in stats_dict.items():
             attempted = value["passed"] + value["failed"]
             value["attempted"] = attempted
@@ -178,6 +187,7 @@ def analyze_multishot_report(log_files):
 
     return {
         "by_model": dict(stats_by_model),
+        "by_model_difficulty": dict(stats_by_model_difficulty),
         "by_shots": dict(stats_by_shots),
         "by_seed": dict(stats_by_seed),
         "by_test_case": dict(stats_by_test_case),
@@ -188,6 +198,10 @@ def print_stats(stats):
     print("\n=== Statistics by Model ===")
     for model, data in sorted(stats["by_model"].items()):
         print(f"{model}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
+
+    print("\n=== Statistics by Model and Difficulty ===")
+    for model_difficulty, data in sorted(stats["by_model_difficulty"].items()):
+        print(f"{model_difficulty}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total ")
 
     print("\n=== Statistics by Number of Shots ===")
     for shots, data in sorted(stats["by_shots"].items(), key=lambda x: int(x[0]) if x[0].isdigit() else float('inf')):
