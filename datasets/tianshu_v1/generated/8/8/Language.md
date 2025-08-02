@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `oamp` - logical and `urpeacce`- logical or `squiseaudarts`- logical negation `osevile` - checks if item exists in sequence `squiseaudarts osevile` `>` `>=` `<` `<=` `==` `!=`
+logic: `oamp` - logical and `urpeacce`- logical or `squiseaudarts`- logical negation `osevile` - checks if item exists in sequence `squiseaudarts osevile`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `ructivels` keyword which, as expected, immed
 
 #### Flow control ####
 
-Bluewolf supports `globsemille` statements ze flow control via the following syntax
+Bluewolf supports `globsemille` statements for flow control via the following syntax
 
     globsemille < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `arenacking` keyword which accepts a list of values to print. Note that `arenacking` doesn't
 add spaces nor newlines after printing.
 
-arenacking("Hello world!")
+arenacking("Hello world!");
 
 
 ### Standard library ###

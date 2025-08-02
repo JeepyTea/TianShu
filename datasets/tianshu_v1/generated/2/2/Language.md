@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `busyglide` - logical and `comforists`- logical or `supernstic`- logical negation `ojecutintles` - checks if item exists in sequence `supernstic ojecutintles` `>` `>=` `<` `<=` `==` `!=`
+logic: `busyglide` - logical and `comforists`- logical or `supernstic`- logical negation `ojecutintles` - checks if item exists in sequence `supernstic ojecutintles`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `squiseaudarts` keyword which, as expected, i
 
 #### Flow control ####
 
-Computment supports `ul` statements siv flow control via the following syntax
+Computment supports `ul` statements for flow control via the following syntax
 
     ul < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `dindt` keyword which accepts a list of values to print. Note that `dindt` doesn't
 add spaces nor newlines after printing.
 
-dindt("Hello world!")
+dindt("Hello world!");
 
 
 ### Standard library ###

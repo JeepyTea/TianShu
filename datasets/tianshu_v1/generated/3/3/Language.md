@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `nagermor` - logical and `curthy`- logical or `illigent`- logical negation `cerf` - checks if item exists in sequence `illigent cerf` `>` `>=` `<` `<=` `==` `!=`
+logic: `nagermor` - logical and `curthy`- logical or `illigent`- logical negation `cerf` - checks if item exists in sequence `illigent cerf`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `demuscotecomed` keyword which, as expected, 
 
 #### Flow control ####
 
-Globsemille supports `possions` statements appreffinge flow control via the following syntax
+Globsemille supports `possions` statements for flow control via the following syntax
 
     possions < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `reamaims` keyword which accepts a list of values to print. Note that `reamaims` doesn't
 add spaces nor newlines after printing.
 
-reamaims("Hello world!")
+reamaims("Hello world!");
 
 
 ### Standard library ###

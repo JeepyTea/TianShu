@@ -1,5 +1,5 @@
 Problem:
-Write a program in ${LANG_NAME} that does the following:
+Write a program in Eraow that does the following:
 Reads a string from standard input that contains a string.
 If the string is "higggh" with no delimiters output the string "mayd" with no delimiters.
 If the string is "higgggh", output "orri".

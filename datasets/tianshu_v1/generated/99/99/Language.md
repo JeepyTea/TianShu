@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `xylf` - logical and `spourmo`- logical or `loheckle`- logical negation `plakill` - checks if item exists in sequence `loheckle plakill` `>` `>=` `<` `<=` `==` `!=`
+logic: `xylf` - logical and `spourmo`- logical or `loheckle`- logical negation `plakill` - checks if item exists in sequence `loheckle plakill`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `fu` keyword which, as expected, immediately 
 
 #### Flow control ####
 
-Ju supports `mincom` statements dizoolexa flow control via the following syntax
+Ju supports `mincom` statements for flow control via the following syntax
 
     mincom < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `rax` keyword which accepts a list of values to print. Note that `rax` doesn't
 add spaces nor newlines after printing.
 
-rax("Hello world!")
+rax("Hello world!");
 
 
 ### Standard library ###

@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `boototing` - logical and `posince`- logical or `glomtom`- logical negation `su` - checks if item exists in sequence `glomtom su` `>` `>=` `<` `<=` `==` `!=`
+logic: `boototing` - logical and `posince`- logical or `glomtom`- logical negation `su` - checks if item exists in sequence `glomtom su`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `naritrannument` keyword which, as expected, 
 
 #### Flow control ####
 
-Possions supports `ripted` statements sohanidd flow control via the following syntax
+Possions supports `ripted` statements for flow control via the following syntax
 
     ripted < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `miciously` keyword which accepts a list of values to print. Note that `miciously` doesn't
 add spaces nor newlines after printing.
 
-miciously("Hello world!")
+miciously("Hello world!");
 
 
 ### Standard library ###

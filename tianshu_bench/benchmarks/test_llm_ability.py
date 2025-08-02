@@ -26,6 +26,7 @@ from pathlib import Path
 
 # Longest time each test may run
 MAX_EXECUTION_TIME_SECONDS = 10*60
+MAX_MAMBA_EXECUTION_TIME_SECONDS = 60
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 LOG_BASE_DIR = PROJECT_ROOT / "results" / "test_logs"
@@ -40,7 +41,7 @@ Take requests for creation of new code.
 Always reply to the user in English.
 You MUST:
 1. Explain any code.
-2. Output a copy of the entire requested code at the END of your response."""
+2. Output a copy of the entire requested code at the END of your response enclosed in triple backticks (```)."""
 
 
 def reset_mamba_state():
@@ -108,6 +109,7 @@ LLM_IDENTIFIERS = [
     "nvidia/deepseek-ai/deepseek-r1-0528",
     "nvidia/deepseek-ai/deepseek-r1-distill-qwen-32b",
     "nvidia/microsoft/phi-4-mini-instruct",
+    "openrouter/openrouter/horizon-alpha"
     #"nvidia/google/gemma-3-27b-it",
     # "sambanova/DeepSeek-R1",
     # "sambanova/DeepSeek-V3-0324",
@@ -277,6 +279,7 @@ def test_generated_program_with_mamba_execution(llm_identifier, mamba_execution_
             disable_warnings=True,
             random_seed=mamba_execution_seed,
             random_seed_was_set=True,
+            max_execution_time_seconds = MAX_MAMBA_EXECUTION_TIME_SECONDS,
         )
     except Exception as e:
         pytest.fail(

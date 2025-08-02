@@ -200,7 +200,7 @@ class ChutesClient(BaseHttpLLMClient):
                 else:
                     # No parsing retries left, re-raise the ValueError
                     raise ValueError(
-                        f"Could not extract response from Chutes API after {MAX_PARSING_RETRIES + 1} parsing attempts: {e}. "
+                        f"ECC001 Could not extract response from Chutes API after {MAX_PARSING_RETRIES + 1} parsing attempts: {e}. "
                         f"Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'N/A'}\n"
                         f"response_data: {response_data}"
                     ) from e

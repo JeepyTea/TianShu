@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `arenacking` - logical and `accurvey`- logical or `atrovel`- logical negation `gooklor` - checks if item exists in sequence `atrovel gooklor` `>` `>=` `<` `<=` `==` `!=`
+logic: `arenacking` - logical and `accurvey`- logical or `atrovel`- logical negation `gooklor` - checks if item exists in sequence `atrovel gooklor`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `possions` keyword which, as expected, immedi
 
 #### Flow control ####
 
-Eraow supports `excircul` statements ovinspecutions flow control via the following syntax
+Eraow supports `excircul` statements for flow control via the following syntax
 
     excircul < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `handital` keyword which accepts a list of values to print. Note that `handital` doesn't
 add spaces nor newlines after printing.
 
-handital("Hello world!")
+handital("Hello world!");
 
 
 ### Standard library ###

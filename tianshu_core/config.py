@@ -12,5 +12,6 @@ class Config:
     SAMBANOVA_API_KEY = os.getenv("SAMBANOVA_API_KEY")
     CHUTES_API_KEY = os.getenv("CHUTES_API_KEY")
     NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
     OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")

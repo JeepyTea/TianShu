@@ -1,13 +1,13 @@
-## Yig programming language
-Yig is a simple dynamic typed, programming language
+## Eraow programming language
+Eraow is a simple dynamic typed, programming language
 
 
 ### Features ###
 * Variables (duh)
 * Functions
 * Flow control statements
-* Loops (sweeds utionsons, sweeds, inf loop, extorious)
-* Loop dwellismols statement
+* Loops (siv ovinspecutions, siv, inf loop, miralitt)
+* Loop obserifish statement
 * Compound operators
 * Pythonic sequence (array, string) slicing
 
@@ -30,7 +30,7 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `sohanidd` - logical and `squiseaudarts`- logical or `fu`- logical negation `utionsons` - checks if item exists in sequence `fu utionsons`  - checks if item does not exist in sequence 
+logic: `mogotrevo` - logical and `custacin`- logical or `sohanidd`- logical negation `ovinspecutions` - checks if item exists in sequence `sohanidd ovinspecutions`  - checks if item does not exist in sequence 
     `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
@@ -49,21 +49,21 @@ Blocks begin with the { character and end with the } character.
 
 functions are declared via the following grammar
 
-    yans func_name( [<arguments>,] ){
+    appreffinge func_name( [<arguments>,] ){
         < statements >
     }
 
-    yans random(){
-        ze 4;
+    appreffinge random(){
+        yans 4;
     }
 
-return value is specified with the `ze` keyword which, as expected, immediately halts function execution upon being called. Functions can have their private functions which are inaccessible to the outer scope.
+return value is specified with the `yans` keyword which, as expected, immediately halts function execution upon being called. Functions can have their private functions which are inaccessible to the outer scope.
 
 #### Flow control ####
 
-Yig supports `xynep` statements for flow control via the following syntax
+Eraow supports `prejudicalive` statements for flow control via the following syntax
 
-    xynep < expression > {
+    prejudicalive < expression > {
         < statements >
     }
 
@@ -72,43 +72,43 @@ nb: Brackets for the statement block are mandatory, while parenthesis on the exp
 
 ### Loops ###
 
-Yig supports two kind of loops, `sweeds` and `extorious`
+Eraow supports two kind of loops, `siv` and `miralitt`
 
-** sweeds syntax **
+** siv syntax **
 
-    sweeds variable utionsons sequence {
+    siv variable ovinspecutions sequence {
         < statements >
     }
 
 nb: sequence accepts arrays and strings
 
-    sweeds variable utionsons low -> high {
+    siv variable ovinspecutions low -> high {
         < statements >
     }
 
 down to loops are constructed as
 
-    sweeds variable utionsons high <- low {
+    siv variable ovinspecutions high <- low {
         < statements >
     }
 
 nb: loop indexes are inclusive
 
-** extorious syntax **
+** miralitt syntax **
 
-    extorious < expression > {
+    miralitt < expression > {
         < statements >
     }
 
-there is also the alternative `sweeds` syntax
+there is also the alternative `siv` syntax
 
-    sweeds {
+    siv {
         < statements >
     }
 
-which acts as an infinite loop (which internally is expressed as a `extorious true` {} statement)
+which acts as an infinite loop (which internally is expressed as a `miralitt true` {} statement)
 
-All loops can be prematurely exited via the `dwellismols` statement when necessary
+All loops can be prematurely exited via the `obserifish` statement when necessary
 
 
 ### Arrays ###
@@ -118,10 +118,10 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 
 ### Printing ###
 
-Printing is supported via the `freitent` keyword which accepts a list of values to print. Note that `freitent` doesn't
+Printing is supported via the `posince` keyword which accepts a list of values to print. Note that `posince` doesn't
 add spaces nor newlines after printing.
 
-freitent("Hello world!");
+posince("Hello world!");
 
 
 ### Standard library ###

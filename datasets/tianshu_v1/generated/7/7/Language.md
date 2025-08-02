@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `abseid` - logical and `plakill`- logical or `reamaims`- logical negation `glowned` - checks if item exists in sequence `reamaims glowned` `>` `>=` `<` `<=` `==` `!=`
+logic: `abseid` - logical and `plakill`- logical or `reamaims`- logical negation `glowned` - checks if item exists in sequence `reamaims glowned`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `calb` keyword which, as expected, immediatel
 
 #### Flow control ####
 
-Belginate supports `bluewolf` statements heimaless flow control via the following syntax
+Belginate supports `bluewolf` statements for flow control via the following syntax
 
     bluewolf < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `guttorply` keyword which accepts a list of values to print. Note that `guttorply` doesn't
 add spaces nor newlines after printing.
 
-guttorply("Hello world!")
+guttorply("Hello world!");
 
 
 ### Standard library ###

@@ -121,21 +121,7 @@ class LLMRegistry:
     def _register_openrouter_models(self):
         """Register predefined OpenRouter models."""
         openrouter_models = [
-            ("anthropic/claude-3.5-sonnet", {"temperature": 0.7, "max_tokens": 4096}),
-            ("anthropic/claude-3-haiku", {"temperature": 0.7, "max_tokens": 4096}),
-            ("openai/gpt-4o", {"temperature": 0.7, "max_tokens": 4096}),
-            ("openai/gpt-4o-mini", {"temperature": 0.7, "max_tokens": 4096}),
-            ("openai/gpt-3.5-turbo", {"temperature": 0.7, "max_tokens":4096}),
-            ("google/gemini-pro-1.5", {"temperature": 0.7, "max_tokens": 8192}),
-            ("google/gemini-flash-1.5", {"temperature": 0.7, "max_tokens": 8192}),
-            ("meta-llama/llama-3.1-405b-instruct", {"temperature": 0.7, "max_tokens": 4096}),
-            ("meta-llama/llama-3.1-70b-instruct", {"temperature": 0.7, "max_tokens": 4096}),
-            ("meta-llama/llama-3.1-8b-instruct", {"temperature": 0.7, "max_tokens": 4096}),
-            ("deepseek/deepseek-r1", {"temperature": 0.6, "max_tokens": 8192}),
-            ("deepseek/deepseek-chat", {"temperature": 0.7, "max_tokens": 4096}),
-            ("qwen/qwen-2.5-72b-instruct", {"temperature": 0.7, "max_tokens": 4096}),
-            ("mistralai/mistral-large", {"temperature": 0.7, "max_tokens": 4096}),
-            ("cohere/command-r-plus", {"temperature": 0.7, "max_tokens": 4096}),
+            ("openrouter/horizon-alpha", {"temperature": 0.7, "max_tokens": 32000}),            
         ]
 
         for model_info in openrouter_models:

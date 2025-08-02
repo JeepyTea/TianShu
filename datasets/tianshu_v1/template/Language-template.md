@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `${AND}` - logical and `${OR}`- logical or `${NOT}`- logical negation `${IN}` - checks if item exists in sequence `${NOT} ${IN}` `>` `>=` `<` `<=` `==` `!=`
+logic: `${AND}` - logical and `${OR}`- logical or `${NOT}`- logical negation `${IN}` - checks if item exists in sequence `${NOT} ${IN}`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `${RETURN}` keyword which, as expected, immed
 
 #### Flow control ####
 
-${LANG_NAME} supports `${IF}` statements ${FOR} flow control via the following syntax
+${LANG_NAME} supports `${IF}` statements for flow control via the following syntax
 
     ${IF} < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `${PRINT}` keyword which accepts a list of values to print. Note that `${PRINT}` doesn't
 add spaces nor newlines after printing.
 
-${PRINT}("Hello world!")
+${PRINT}("Hello world!");
 
 
 ### Standard library ###

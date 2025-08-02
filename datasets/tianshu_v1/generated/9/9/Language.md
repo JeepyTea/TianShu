@@ -30,13 +30,20 @@ variables are dynamically typed immediately declared upon use `number = 42;`
 
 ### Operators ###
 
-logic: `demuscotecomed` - logical and `modeflick`- logical or `xylf`- logical negation `pilfiled` - checks if item exists in sequence `xylf pilfiled` `>` `>=` `<` `<=` `==` `!=`
+logic: `demuscotecomed` - logical and `modeflick`- logical or `xylf`- logical negation `pilfiled` - checks if item exists in sequence `xylf pilfiled`  - checks if item does not exist in sequence 
+    `>` `>=` `<` `<=` `==` `!=`
 
 arithmetic: `+` `-` `*` `/` `**`(Power)
 
 binary: `~` `^` `|` `&` `>>` `<<`
 
 ternary: `test ? true_value : $false_value`
+
+#### Statements ####
+Statements end with the ; character.
+
+#### Blocks ####
+Blocks begin with the { character and end with the } character.
 
 #### Functions ####
 
@@ -54,13 +61,13 @@ return value is specified with the `shothi` keyword which, as expected, immediat
 
 #### Flow control ####
 
-Shothi supports `heimaless` statements naritrannument flow control via the following syntax
+Shothi supports `heimaless` statements for flow control via the following syntax
 
     heimaless < expression > {
         < statements >
     }
 
-nb: Brackets are mandatory, while parenthesis on the expression are optional
+nb: Brackets for the statement block are mandatory, while parenthesis on the expression are optional
 
 
 ### Loops ###
@@ -114,7 +121,7 @@ Arrays have dynamic length and can be declared via the  `[ ... ]` expression
 Printing is supported via the `roshankleboal` keyword which accepts a list of values to print. Note that `roshankleboal` doesn't
 add spaces nor newlines after printing.
 
-roshankleboal("Hello world!")
+roshankleboal("Hello world!");
 
 
 ### Standard library ###
