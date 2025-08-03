@@ -5,6 +5,7 @@ from .samba_nova_client import SambaNovaClient
 from .chutes_client import ChutesClient
 from .nvidia_client import NvidiaClient
 from .openrouter_client import OpenRouterClient
+from .anthropic_client import AnthropicClient
 
 
 class LLMRegistry:
@@ -31,6 +32,9 @@ class LLMRegistry:
 
         # Register OpenRouter models
         self._register_openrouter_models()
+
+        # Register Anthropic models
+        self._register_anthropic_models()
 
     def _register_ollama_models(self):
         """Register predefined Ollama models."""
@@ -133,6 +137,26 @@ class LLMRegistry:
                 
             key = f"openrouter/{model}"
             self._registry[key] = (OpenRouterClient, {"model": model, **config})
+
+    def _register_anthropic_models(self):
+        """Register predefined Anthropic models."""
+        anthropic_models = [
+            ("claude-3-5-sonnet-20241022", {"temperature": 0.7, "max_tokens": 4096}),
+            ("claude-3-5-haiku-20241022", {"temperature": 0.7, "max_tokens": 4096}),
+            ("claude-3-opus-20240229", {"temperature": 0.7, "max_tokens": 4096}),
+            ("claude-3-sonnet-20240229", {"temperature": 0.7, "max_tokens": 4096}),
+            ("claude-3-haiku-20240307", {"temperature": 0.7, "max_tokens": 4096}),
+        ]
+
+        for model_info in anthropic_models:
+            if isinstance(model_info, tuple):
+                model, config = model_info
+            else:
+                model = model_info
+                config = {}
+                
+            key = f"anthropic/{model}"
+            self._registry[key] = (AnthropicClient, {"model": model, **config})
 
     def get_client(self, model_id: str, **additional_config) -> BaseLLMClient:
         """
