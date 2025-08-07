@@ -2,6 +2,7 @@ import json
 import sys
 import csv
 from collections import defaultdict
+import argparse
 from pathlib import Path
 
 def load_problem_definitions():
@@ -38,13 +39,14 @@ def load_test_case_to_problem_mapping():
 
     return test_case_map
 
-def analyze_multishot_report(log_files):
+def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
     """
     Analyzes one or more pytest report log files, combining statistics.
 
     Args:
         log_files (list): A list of file paths to the report logs (each line is a JSON object).
-
+        filter_difficulty_2_plus (bool): If True, only analyze problems with difficulty 2 or greater.
+        
     Returns:
         dict: A dictionary containing combined statistics by model, shots, seed, test case, and problem.
     """
@@ -111,6 +113,20 @@ def analyze_multishot_report(log_files):
                                         problem_id = "unknown"
                                         problem_name = "Unknown Problem"
                                         difficulty = "unknown"
+
+                                    # Apply difficulty filter if enabled
+                                    if filter_difficulty_2_plus:
+                                        numeric_difficulty = 0  # Default to 0 if conversion fails or difficulty is not numeric
+                                        try:
+                                            numeric_difficulty = int(difficulty)
+                                        except ValueError:
+                                            # If difficulty is not a valid number, numeric_difficulty remains 0.
+                                            # This effectively treats non-numeric difficulties as less than 2,
+                                            # causing them to be filtered out when --mini is active.
+                                            pass
+
+                                        if numeric_difficulty < 2:
+                                            continue # Skip this entry if difficulty is less than 2
 
                                     problem_key = f"{problem_id}: {problem_name}"
                                     model_difficulty_key = f"{model_name} (Difficulty {difficulty})"
@@ -221,12 +237,16 @@ def print_stats(stats):
         print(f"{problem}: {data['passed']}/{data['attempted']} ({data['success_rate']}%) passed, {data['failed']} failed, {data['skipped']} skipped, {data['total']} total")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python analyze_multishot_report.py <report_log_file_1> [report_log_file_2 ...]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Analyze pytest multishot report logs.")
+    parser.add_argument("log_files", nargs="+", help="One or more pytest report log files.")
+    parser.add_argument("--mini", action="store_true",
+                        help="Only analyze results for problem difficulty 2 or greater.")
 
-    log_files = sys.argv[1:] # Get all arguments after the script name
-    stats = analyze_multishot_report(log_files)
+    args = parser.parse_args()
+
+    # The log_files are in args.log_files, and --mini status in args.mini
+    stats = analyze_multishot_report(args.log_files, filter_difficulty_2_plus=args.mini)
+
     print_stats(stats)
 
     # Save the combined statistics to a JSON file
