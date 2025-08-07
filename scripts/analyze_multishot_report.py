@@ -39,13 +39,13 @@ def load_test_case_to_problem_mapping():
 
     return test_case_map
 
-def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
+def analyze_multishot_report(log_files, filter_mini_bench=False):
     """
     Analyzes one or more pytest report log files, combining statistics.
 
     Args:
         log_files (list): A list of file paths to the report logs (each line is a JSON object).
-        filter_difficulty_2_plus (bool): If True, only analyze problems with difficulty 2 or greater.
+        filter_mini_bench (bool): If True, only analyze problems with difficulty 2 or greater, seed 1, 8 shots.
         
     Returns:
         dict: A dictionary containing combined statistics by model, shots, seed, test case, and problem.
@@ -66,6 +66,7 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
 
     # Track seen tests to detect duplicates
     seen_tests = set()
+    seen_tests_with_result = set()
     count = 0
 
     # Process each log file provided
@@ -115,7 +116,7 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                                         difficulty = "unknown"
 
                                     # Apply difficulty filter if enabled
-                                    if filter_difficulty_2_plus:
+                                    if filter_mini_bench:
                                         numeric_difficulty = 0  # Default to 0 if conversion fails or difficulty is not numeric
                                         try:
                                             numeric_difficulty = int(difficulty)
@@ -125,8 +126,8 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                                             # causing them to be filtered out when --mini is active.
                                             pass
 
-                                        if numeric_difficulty < 2:
-                                            continue # Skip this entry if difficulty is less than 2
+                                        if numeric_difficulty < 2 or shots != "8" or seed != "1":
+                                            continue # We're only interested in difficulty 2+, 8 shots, seed (language) 1
 
                                     problem_key = f"{problem_id}: {problem_name}"
                                     model_difficulty_key = f"{model_name} (Difficulty {difficulty})"
@@ -138,10 +139,12 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                                     test_id = f"{model_name}-{shots}-{seed}-{test_case}"
 
                                     # Check if we've seen this test before
-                                    if test_id in seen_tests:
-                                        print(f"WARNING: Duplicate test found: {test_id}")
-                                    else:
+                                    if not test_id in seen_tests:
                                         seen_tests.add(test_id)
+                                    
+                                    if test_id in seen_tests_with_result:
+                                        # only bother counting the first result.
+                                        continue
 
                                     # Update statistics
                                     stats_by_model[model_name]["total"] += 1
@@ -152,6 +155,7 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                                     stats_by_problem[problem_key]["total"] += 1
 
                                     if outcome == 'passed':
+                                        seen_tests_with_result.add(test_id)
                                         stats_by_model[model_name]["passed"] += 1
                                         stats_by_model_difficulty[model_difficulty_key]["passed"] += 1
                                         stats_by_shots[shots]["passed"] += 1
@@ -159,6 +163,7 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                                         stats_by_test_case[test_case]["passed"] += 1
                                         stats_by_problem[problem_key]["passed"] += 1
                                     elif outcome == 'failed':
+                                        seen_tests_with_result.add(test_id)
                                         stats_by_model[model_name]["failed"] += 1
                                         stats_by_model_difficulty[model_difficulty_key]["failed"] += 1
                                         stats_by_shots[shots]["failed"] += 1
@@ -182,6 +187,9 @@ def analyze_multishot_report(log_files, filter_difficulty_2_plus=False):
                         # Skip lines that are not valid JSON
                         print(f"Got invalid JSON {line}")
                         continue
+                # Print out seen_tests set
+                for current_seen in seen_tests:
+                    print(f"Warning: duplicate test detected: {current_seen}")
         except FileNotFoundError:
             print(f"Warning: Report log file not found: {log_file}. Skipping this file.", file=sys.stderr)
             continue
@@ -245,7 +253,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # The log_files are in args.log_files, and --mini status in args.mini
-    stats = analyze_multishot_report(args.log_files, filter_difficulty_2_plus=args.mini)
+    stats = analyze_multishot_report(args.log_files, filter_mini_bench=args.mini)
 
     print_stats(stats)
 

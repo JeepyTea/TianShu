@@ -73,9 +73,11 @@ class LLMRegistry:
     def _register_chutes_models(self):
         """Register predefined Chutes models."""
         chutes_models = [
+            ("zai-org/GLM-4.5-Air", {"context_length": 58000, "temperature": 0.7}),
+            ("moonshotai/Kimi-K2-Instruct", {"context_length": 31000, "temperature": 0.7}),
+            ("deepseek-ai/DeepSeek-R1-0528", {"context_length": 128000, "temperature": 0.7}),
             ("deepseek-ai/DeepSeek-R1", {"context_length": 128000, "temperature": 0.6, "top_p": 0.7}),
             ("deepseek-ai/DeepSeek-V3-0324", {"context_length": 128000, "temperature": 0.7}),
-            ("deepseek-ai/DeepSeek-R1-0528", {"context_length": 128000, "temperature": 0.7}),
             ("ddeepseek-ai/DeepSeek-R1-0528-Qwen3-8B", {"context_length": 128000, "temperature": 0.7}),
             ("Qwen/Qwen3-235B-A22B", {"context_length": 32000, "temperature": 0.7}),
             ("Qwen/Qwen3-30B-A3B", {"context_length": 32000, "temperature": 0.7}),
@@ -86,7 +88,6 @@ class LLMRegistry:
             ("unsloth/gemma-3-27b-it", {"context_length": 32000, "temperature": 0.7}),
             ("meta-llama/Llama-3-70B-Instruct", {"context_length": 32000, "temperature": 0.7}),
             ("mistralai/Mistral-7B-Instruct-v0.2", {"context_length": 32000, "temperature": 0.7}),
-            ("moonshotai/Kimi-K2-Instruct", {"context_length": 58000, "temperature": 0.7}),
         ]
 
         for model_info in chutes_models:
@@ -109,6 +110,9 @@ class LLMRegistry:
             ("deepseek-ai/deepseek-r1-0528", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.7}),
             ("deepseek-ai/deepseek-r1-distill-qwen-32b", {"context_length": 32000, "max_tokens": 32000, "temperature": 0.6, "top_p": 0.7}),
             ("deepseek-ai/deepseek-r1", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.6, "top_p": 0.7}),
+            ("openai/gpt-oss-20b", {"context_length": 128000, "max_tokens": 32000, "temperature": 1, "top_p": 1}),
+            ("openai/gpt-oss-120b", {"context_length": 128000, "max_tokens": 32000, "temperature": 1, "top_p": 1}),
+            ("moonshotai/kimi-k2-instruct", {"context_length": 31000, "max_tokens": 25000, "temperature": 0.6, "top_p": 0.9}),
             ("microsoft/phi-4-mini-instruct", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.1, "top_p": 0.6}),
             
         ]
@@ -141,11 +145,12 @@ class LLMRegistry:
     def _register_anthropic_models(self):
         """Register predefined Anthropic models."""
         anthropic_models = [
-            ("claude-3-5-sonnet-20241022", {"temperature": 0.7, "max_tokens": 4096}),
-            ("claude-3-5-haiku-20241022", {"temperature": 0.7, "max_tokens": 4096}),
-            ("claude-3-opus-20240229", {"temperature": 0.7, "max_tokens": 4096}),
-            ("claude-3-sonnet-20240229", {"temperature": 0.7, "max_tokens": 4096}),
-            ("claude-3-haiku-20240307", {"temperature": 0.7, "max_tokens": 4096}),
+            ("claude-opus-4-20250514", {"temperature": 0.7, "max_tokens": 31000}),
+            ("claude-sonnet-4-20250514", {"temperature": 0.7, "max_tokens": 32000}),
+            ("claude-opus-4-1-20250805", {"temperature": 0.7, "max_tokens": 32000}),
+            ("claude-3-7-sonnet-20250219", {"temperature": 0.7, "max_tokens": 32000}),
+            ("claude-3-5-sonnet-20241022", {"temperature": 0.7, "max_tokens": 8000}),
+            ("claude-3-5-haiku-20241022", {"temperature": 0.7, "max_tokens": 8000}),
         ]
 
         for model_info in anthropic_models:

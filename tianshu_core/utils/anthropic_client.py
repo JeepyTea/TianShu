@@ -44,7 +44,6 @@ class AnthropicClient(BaseHttpLLMClient):
         # Set default generation parameters
         local_config.setdefault("temperature", 0.7)
         local_config.setdefault("max_tokens", 4096)
-        local_config.setdefault("top_p", 1.0)
 
         super().__init__(local_config)
 
@@ -166,8 +165,11 @@ class AnthropicClient(BaseHttpLLMClient):
             "max_tokens": kwargs.get("max_tokens", self.max_tokens),
             # Use configured parameters if not overridden in kwargs
             "temperature": kwargs.get("temperature", self.temperature),
-            "top_p": kwargs.get("top_p", self.top_p),
         }
+
+        if kwargs.get("top_p"):
+            # Opus 4.1 can't have both top_p and temperature.
+            anthropic_params["top_p"] = kwargs.get("top_p")
 
         # Add system prompt if present
         if system_prompt:
