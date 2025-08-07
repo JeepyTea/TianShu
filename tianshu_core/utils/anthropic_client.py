@@ -30,6 +30,7 @@ class AnthropicClient(BaseHttpLLMClient):
                     'temperature': (Optional) Temperature setting for the model (default: 0.7).
                     'max_tokens': (Optional) Maximum number of tokens to generate (default: 4096).
                     'top_p': (Optional) Top-p sampling parameter (default: 1.0).
+                    'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
         # Prioritize config value, then env var, then default for base_url
         local_config.setdefault(
@@ -44,6 +45,9 @@ class AnthropicClient(BaseHttpLLMClient):
         # Set default generation parameters
         local_config.setdefault("temperature", 0.7)
         local_config.setdefault("max_tokens", 4096)
+        
+        # Store extra_body if provided in config
+        self.extra_body = local_config.pop("extra_body", None)
 
         super().__init__(local_config)
 
@@ -184,6 +188,10 @@ class AnthropicClient(BaseHttpLLMClient):
                 "system_prompt",
             ]:
                 anthropic_params[key] = value
+        
+        # Add extra_body from instance attribute if it exists
+        if self.extra_body:
+            anthropic_params.update(self.extra_body)
 
         # Make the HTTP request with retry logic
         endpoint = self._get_endpoint("messages")

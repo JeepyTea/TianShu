@@ -151,6 +151,13 @@ class LLMRegistry:
             ("claude-3-7-sonnet-20250219", {"temperature": 0.7, "max_tokens": 32000}),
             ("claude-3-5-sonnet-20241022", {"temperature": 0.7, "max_tokens": 8000}),
             ("claude-3-5-haiku-20241022", {"temperature": 0.7, "max_tokens": 8000}),
+            # New entries for "thinking" versions
+            ("claude-opus-4-20250514-thinking", {"temperature": 0.7, "max_tokens": 31000, "extra_body": {"metadata": {"thinking": True}}}),
+            ("claude-sonnet-4-20250514-thinking", {"temperature": 0.7, "max_tokens": 32000, "extra_body": {"metadata": {"thinking": True}}}),
+            ("claude-opus-4-1-20250805-thinking", {"temperature": 0.7, "max_tokens": 32000, "extra_body": {"metadata": {"thinking": True}}}),
+            ("claude-3-7-sonnet-20250219-thinking", {"temperature": 0.7, "max_tokens": 32000, "extra_body": {"metadata": {"thinking": True}}}),
+            ("claude-3-5-sonnet-20241022-thinking", {"temperature": 0.7, "max_tokens": 8000, "extra_body": {"metadata": {"thinking": True}}}),
+            ("claude-3-5-haiku-20241022-thinking", {"temperature": 0.7, "max_tokens": 8000, "extra_body": {"metadata": {"thinking": True}}}),
         ]
 
         for model_info in anthropic_models:
