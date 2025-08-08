@@ -77,8 +77,13 @@ class AnthropicClient(BaseHttpLLMClient):
     def _extract_response(self, response_data: dict) -> str:
         """Extracts the response text from the Anthropic API JSON data."""
         try:
-            # Anthropic API response format
-            return response_data["content"][0]["text"]
+            # Iterate through content blocks to find the 'text' type
+            for content_block in response_data.get("content", []):
+                if content_block.get("type") == "text":
+                    return content_block.get("text", "")
+            
+            # If no 'text' type content is found, raise an error
+            raise ValueError("No 'text' type content found in Anthropic API response.")
         except (KeyError, IndexError) as e:
             raise ValueError(
                 f"Could not extract response from Anthropic API: {e}. Response keys: {list(response_data.keys())}"
