@@ -132,6 +132,9 @@ LLM_IDENTIFIERS = [
     "openai/gpt-4o",
     "openai/gpt-4o-mini",
     "openai/gpt-4-turbo",
+    "gemini/gemini-pro", # Add this
+    "gemini/gemini-1.5-pro-latest", # Add this
+    "gemini/gemini-1.5-flash-latest", # Add this
 ]
 
 # Default LLM parameters

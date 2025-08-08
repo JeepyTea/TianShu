@@ -7,6 +7,7 @@ from .nvidia_client import NvidiaClient
 from .openrouter_client import OpenRouterClient
 from .anthropic_client import AnthropicClient
 from .openai_client import OpenAIClient
+from .gemini_client import GeminiClient # Add this import
 
 
 class LLMRegistry:
@@ -39,6 +40,9 @@ class LLMRegistry:
 
         # Register OpenAI models
         self._register_openai_models()
+
+        # Register Gemini models # Add this line
+        self._register_gemini_models()
 
     def _register_ollama_models(self):
         """Register predefined Ollama models."""
@@ -192,6 +196,24 @@ class LLMRegistry:
                 
             key = f"openai/{model}"
             self._registry[key] = (OpenAIClient, {"model": model, **config})
+
+    def _register_gemini_models(self): # Add this new method
+        """Register predefined Google Gemini models."""
+        gemini_models = [
+            ("gemini-pro", {"temperature": 0.7, "max_tokens": 4096, "top_k": 32}),
+            ("gemini-1.5-pro-latest", {"temperature": 0.7, "max_tokens": 8192, "top_k": 32}),
+            ("gemini-1.5-flash-latest", {"temperature": 0.7, "max_tokens": 8192, "top_k": 32}),
+        ]
+
+        for model_info in gemini_models:
+            if isinstance(model_info, tuple):
+                model, config = model_info
+            else:
+                model = model_info
+                config = {}
+                
+            key = f"gemini/{model}"
+            self._registry[key] = (GeminiClient, {"model": model, **config})
 
     def get_client(self, model_id: str, **additional_config) -> BaseLLMClient:
         """
