@@ -125,12 +125,10 @@ LLM_IDENTIFIERS = [
     "anthropic/claude-3-5-sonnet-20241022",
     "anthropic/claude-3-5-haiku-20241022", 
     # New entries for "thinking" versions
-    "anthropic/claude-opus-4-20250514-thinking",
-    "anthropic/claude-sonnet-4-20250514-thinking",
-    "anthropic/claude-opus-4-1-20250805-thinking",
-    "anthropic/claude-3-7-sonnet-20250219-thinking",
-    "anthropic/claude-3-5-sonnet-20241022-thinking",
-    "anthropic/claude-3-5-haiku-20241022-thinking",
+    "anthropic/thinking/claude-opus-4-20250514",
+    "anthropic/thinking/claude-sonnet-4-20250514",
+    "anthropic/thinking/claude-opus-4-1-20250805",
+    "anthropic/thinking/claude-3-7-sonnet-20250219",
 ]
 
 # Default LLM parameters
