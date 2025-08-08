@@ -161,10 +161,15 @@ class AnthropicClient(BaseHttpLLMClient):
         """
         # Convert messages to Anthropic format
         system_prompt, anthropic_messages = self._convert_messages_to_anthropic_format(messages)
+        # Strip "thinking/" prefix from the model name if present                                                                                                                                                                                                                                                                                          
+        # This handles cases where the model identifier itself includes the "thinking/" prefix                                                                                                                                                                                                                                                             
+        api_model_name = self.model                                                                                                                                                                                                                                                                                                                        
+        if api_model_name.startswith("thinking/"):                                                                                                                                                                                                                                                                                                         
+            api_model_name = api_model_name.replace("thinking/", "", 1) # Remove only the first occurrence       
 
         # Prepare the request payload
         anthropic_params = {
-            "model": self.model,
+            "model": api_model_name,
             "messages": anthropic_messages,
             "max_tokens": kwargs.get("max_tokens", self.max_tokens),
             # Use configured parameters if not overridden in kwargs
