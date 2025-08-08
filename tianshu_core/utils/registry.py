@@ -6,6 +6,7 @@ from .chutes_client import ChutesClient
 from .nvidia_client import NvidiaClient
 from .openrouter_client import OpenRouterClient
 from .anthropic_client import AnthropicClient
+from .openai_client import OpenAIClient
 
 
 class LLMRegistry:
@@ -35,6 +36,9 @@ class LLMRegistry:
 
         # Register Anthropic models
         self._register_anthropic_models()
+
+        # Register OpenAI models
+        self._register_openai_models()
 
     def _register_ollama_models(self):
         """Register predefined Ollama models."""
@@ -167,6 +171,27 @@ class LLMRegistry:
                 
             key = f"anthropic/{model}"
             self._registry[key] = (AnthropicClient, {"model": model, **config})
+
+    def _register_openai_models(self):
+        """Register predefined OpenAI models."""
+        openai_models = [
+            ("gpt-4o", {"temperature": 0.7, "max_tokens": 4096}),
+            ("gpt-4o-mini", {"temperature": 0.7, "max_tokens": 4096}),
+            ("gpt-4-turbo", {"temperature": 0.7, "max_tokens": 4096}),
+            ("gpt-3.5-turbo", {"temperature": 0.7, "max_tokens": 4096}),
+            # Example for JSON mode
+            # ("gpt-4o-json", {"temperature": 0.7, "max_tokens": 4096, "response_format": {"type": "json_object"}}),
+        ]
+
+        for model_info in openai_models:
+            if isinstance(model_info, tuple):
+                model, config = model_info
+            else:
+                model = model_info
+                config = {}
+                
+            key = f"openai/{model}"
+            self._registry[key] = (OpenAIClient, {"model": model, **config})
 
     def get_client(self, model_id: str, **additional_config) -> BaseLLMClient:
         """

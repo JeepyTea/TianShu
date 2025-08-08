@@ -14,5 +14,6 @@ class Config:
     NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
     OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
     OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")

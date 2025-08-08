@@ -129,6 +129,9 @@ LLM_IDENTIFIERS = [
     "anthropic/thinking/claude-sonnet-4-20250514",
     "anthropic/thinking/claude-opus-4-1-20250805",
     "anthropic/thinking/claude-3-7-sonnet-20250219",
+    "openai/gpt-4o",
+    "openai/gpt-4o-mini",
+    "openai/gpt-4-turbo",
 ]
 
 # Default LLM parameters
