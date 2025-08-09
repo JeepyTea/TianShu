@@ -29,7 +29,7 @@ class GeminiClient(BaseHttpLLMClient):
                     'headers': (Optional) Additional custom headers dictionary.
                     'temperature': (Optional) Temperature setting for the model.
                     'max_tokens': (Optional) Maximum number of tokens to generate.
-                    'top_p': (Optional) Top-p sampling parameter (default: 1.0).
+                    'top_p': (Optional) Top-p sampling parameter.
                     'top_k': (Optional) Top-k sampling parameter.
                     'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
@@ -44,7 +44,6 @@ class GeminiClient(BaseHttpLLMClient):
         local_config.setdefault("timeout", self.DEFAULT_TIMEOUT)
 
         # Set default generation parameters
-        local_config.setdefault("top_p", 1.0)
 
         # Store extra_body if provided in config
         self.extra_body = local_config.pop("extra_body", None)
