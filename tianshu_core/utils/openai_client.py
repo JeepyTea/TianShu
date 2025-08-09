@@ -27,8 +27,8 @@ class OpenAIClient(BaseHttpLLMClient):
                     'base_url': (Optional) The API endpoint URL (defaults to OpenAI API endpoint).
                     'timeout': (Optional) Request timeout in seconds (default: 360).
                     'headers': (Optional) Additional custom headers dictionary.
-                    'temperature': (Optional) Temperature setting for the model (default: 0.7).
-                    'max_tokens': (Optional) Maximum number of tokens to generate (default: 4096).
+                    'temperature': (Optional) Temperature setting for the model (default: 1).
+                    'max_completion_tokens': (Optional) Maximum number of tokens to generate (default: 4096).
                     'top_p': (Optional) Top-p sampling parameter (default: 1.0).
                     'frequency_penalty': (Optional) Frequency penalty (default: 0.0).
                     'presence_penalty': (Optional) Presence penalty (default: 0.0).
@@ -45,7 +45,7 @@ class OpenAIClient(BaseHttpLLMClient):
         local_config.setdefault("timeout", self.DEFAULT_TIMEOUT)
 
         # Set default generation parameters
-        local_config.setdefault("temperature", 0.7)
+        local_config.setdefault("temperature", 1)
         local_config.setdefault("max_tokens", 4096)
         local_config.setdefault("top_p", 1.0)
         local_config.setdefault("frequency_penalty", 0.0)
@@ -59,7 +59,7 @@ class OpenAIClient(BaseHttpLLMClient):
         self.api_token = self.config.get("api_token")
         self.model = self.config.get("model")
         self.temperature = self.config.get("temperature")
-        self.max_tokens = self.config.get("max_tokens")
+        self.max_tokens = self.config.get("max_completion_tokens")
         self.top_p = self.config.get("top_p")
         self.frequency_penalty = self.config.get("frequency_penalty")
         self.presence_penalty = self.config.get("presence_penalty")
@@ -140,7 +140,7 @@ class OpenAIClient(BaseHttpLLMClient):
             "messages": messages,
             # Use configured parameters if not overridden in kwargs
             "temperature": kwargs.get("temperature", self.temperature),
-            "max_tokens": kwargs.get("max_tokens", self.max_tokens),
+            "max_completion_tokens": kwargs.get("max_tokens", self.max_tokens),
             "top_p": kwargs.get("top_p", self.top_p),
             "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
             "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
@@ -155,7 +155,7 @@ class OpenAIClient(BaseHttpLLMClient):
         for key, value in kwargs.items():
             if key not in openai_params and key not in [
                 "temperature",
-                "max_tokens",
+                "max_completion_tokens",
                 "top_p",
                 "frequency_penalty",
                 "presence_penalty",
