@@ -31,6 +31,7 @@ class GeminiClient(BaseHttpLLMClient):
                     'max_tokens': (Optional) Maximum number of tokens to generate.
                     'top_p': (Optional) Top-p sampling parameter.
                     'top_k': (Optional) Top-k sampling parameter.
+                    'reasoning_effort': (Optional) Reasoning effort parameter.
                     'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
         # Prioritize config value, then env var, then default for base_url
@@ -56,6 +57,7 @@ class GeminiClient(BaseHttpLLMClient):
         self.max_output_tokens = self.config.get("max_tokens")
         self.top_p = self.config.get("top_p")
         self.top_k = self.config.get("top_k")
+        self.reasoning_effort = self.config.get("reasoning_effort")
 
         # Gemini API key is typically passed as a query parameter or x-goog-api-key header
         # Using x-goog-api-key header for consistency with other API key headers
@@ -186,6 +188,10 @@ class GeminiClient(BaseHttpLLMClient):
         if self.extra_body:
             gemini_params.update(self.extra_body)
 
+        reasoning_effort = kwargs.get("reasoning_effort", self.reasoning_effort)
+        if reasoning_effort is not None:
+            gemini_params["reasoning_effort"] = reasoning_effort
+
         # Add any additional parameters from kwargs that match Gemini's API
         # Ensure we don't overwrite parameters already set from defaults or explicit kwargs
         for key, value in kwargs.items():
@@ -195,6 +201,7 @@ class GeminiClient(BaseHttpLLMClient):
                 "top_p",
                 "top_k",
                 "system_prompt",  # Handled in _convert_messages_to_gemini_format
+                "reasoning_effort",
             ]:
                 gemini_params[key] = value
 
