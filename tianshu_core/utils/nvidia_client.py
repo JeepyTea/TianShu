@@ -13,7 +13,7 @@ class NvidiaClient(BaseHttpLLMClient):
     """
 
     DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1"
-    DEFAULT_TIMEOUT = 120
+    DEFAULT_TIMEOUT = 360
 
     def __init__(self, local_config: dict):
         """

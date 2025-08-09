@@ -13,7 +13,7 @@ class AnthropicClient(BaseHttpLLMClient):
     """
 
     DEFAULT_BASE_URL = "https://api.anthropic.com/v1"
-    DEFAULT_TIMEOUT = 120
+    DEFAULT_TIMEOUT = 240
 
     def __init__(self, local_config: dict):
         """
