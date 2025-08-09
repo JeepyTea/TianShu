@@ -120,22 +120,27 @@ LLM_IDENTIFIERS = [
     # "sambanova/Llama-4-Maverick-17B-128E-Instruct",
     "anthropic/claude-opus-4-1-20250805",
     "anthropic/claude-opus-4-20250514",
-    "anthropic/claude-sonnet-4-20250514", 
+    "anthropic/claude-sonnet-4-20250514",
     "anthropic/claude-3-7-sonnet-20250219",
     "anthropic/claude-3-5-sonnet-20241022",
-    "anthropic/claude-3-5-haiku-20241022", 
+    "anthropic/claude-3-5-haiku-20241022",
     # New entries for "thinking" versions
     "anthropic/thinking/claude-opus-4-20250514",
     "anthropic/thinking/claude-sonnet-4-20250514",
     "anthropic/thinking/claude-opus-4-1-20250805",
     "anthropic/thinking/claude-3-7-sonnet-20250219",
-    "openai/gpt-4o",
-    "openai/gpt-4o-mini",
-    "openai/gpt-4-turbo",
-    "gemini/gemini-pro", # Add this
-    "gemini/gemini-1.5-pro-latest", # Add this
-    "gemini/gemini-1.5-flash-latest", # Add this
+    "openai/gpt-5",
+    "openai/gpt-5-mini",
+    "openai/gpt-5-nano",
+    "openai/thinking/gpt-5",
+    "openai/thinking/gpt-5-mini",
+    "openai/thinking/gpt-5-nano",
+    "gemini/gemini-2.5-pro",
+    "gemini/gemini-2.5-flash",
+    "gemini/thinking/gemini-2.5-pro",
+    "gemini/thinking/gemini-2.5-flash",
 ]
+
 
 # Default LLM parameters
 LLM_PARAMS = {
@@ -563,7 +568,7 @@ def test_execute_generated_multi_shot(
             # print("test_execute_generated_multi_shot 130")
             if shot == num_shots - 1:  # Last attempt
                 detailed_test_logger.debug("--")
-                
+
                 error_string = (f"E004 Mamba execution failed for Problem-{problem_id}, test case '{input_value}' with exception: {e}\n"
                     f"seed: {mamba_execution_seed} \n"
                     f"Shot: {shot+1}\n"

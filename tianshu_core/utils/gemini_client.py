@@ -57,6 +57,7 @@ class GeminiClient(BaseHttpLLMClient):
         self.max_output_tokens = self.config.get("max_tokens")
         self.top_p = self.config.get("top_p")
         self.top_k = self.config.get("top_k")
+        self.thinking_config = self.config.get("thinkingConfig")
         self.reasoning_effort = self.config.get("reasoning_effort")
 
         # Gemini API key is typically passed as a query parameter or x-goog-api-key header
@@ -176,6 +177,7 @@ class GeminiClient(BaseHttpLLMClient):
             "maxOutputTokens": kwargs.get("max_tokens", self.max_output_tokens),
             "topP": kwargs.get("top_p", self.top_p),
             "topK": kwargs.get("top_k", self.top_k),
+            "thinkingConfig": kwargs.get("thinking_config", self.thinking_config),
         }
         generation_config = {k: v for k, v in generation_config_with_none.items() if v is not None}
 

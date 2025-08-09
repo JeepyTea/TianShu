@@ -104,7 +104,7 @@ class LLMRegistry:
             else:
                 model = model_info
                 config = {}
-                
+
             key = f"chutes/{model}"
             self._registry[key] = (ChutesClient, {"model": model, **config})
 
@@ -122,7 +122,7 @@ class LLMRegistry:
             ("openai/gpt-oss-120b", {"context_length": 128000, "max_tokens": 32000, "temperature": 1, "top_p": 1}),
             ("moonshotai/kimi-k2-instruct", {"context_length": 31000, "max_tokens": 25000, "temperature": 0.6, "top_p": 0.9}),
             ("microsoft/phi-4-mini-instruct", {"context_length": 128000, "max_tokens": 32000, "temperature": 0.1, "top_p": 0.6}),
-            
+
         ]
 
         for model_info in nvidia_models:
@@ -137,7 +137,7 @@ class LLMRegistry:
     def _register_openrouter_models(self):
         """Register predefined OpenRouter models."""
         openrouter_models = [
-            ("openrouter/horizon-alpha", {"temperature": 0.7, "max_tokens": 32000}),            
+            ("openrouter/horizon-alpha", {"temperature": 0.7, "max_tokens": 32000}),
         ]
 
         for model_info in openrouter_models:
@@ -146,7 +146,7 @@ class LLMRegistry:
             else:
                 model = model_info
                 config = {}
-                
+
             key = f"openrouter/{model}"
             self._registry[key] = (OpenRouterClient, {"model": model, **config})
 
@@ -172,19 +172,19 @@ class LLMRegistry:
             else:
                 model = model_info
                 config = {}
-                
+
             key = f"anthropic/{model}"
             self._registry[key] = (AnthropicClient, {"model": model, **config})
 
     def _register_openai_models(self):
         """Register predefined OpenAI models."""
         openai_models = [
-            ("gpt-4o", {"temperature": 0.7, "max_tokens": 4096}),
-            ("gpt-4o-mini", {"temperature": 0.7, "max_tokens": 4096}),
-            ("gpt-4-turbo", {"temperature": 0.7, "max_tokens": 4096}),
-            ("gpt-3.5-turbo", {"temperature": 0.7, "max_tokens": 4096}),
-            # Example for JSON mode
-            # ("gpt-4o-json", {"temperature": 0.7, "max_tokens": 4096, "response_format": {"type": "json_object"}}),
+            ("gpt-5", {"max_completion_tokens": 32000}),
+            ("gpt-5-mini", {"max_completion_tokens": 32000}),
+            ("gpt-5-nano", {"max_completion_tokens": 32000}),
+            ("thinking/gpt-5", {"max_completion_tokens": 32000,"extra_body":{"reasoning_effort": "high",}}, ),
+            ("thinking/gpt-5-mini", {"max_completion_tokens": 32000,"extra_body":{"reasoning_effort": "high",}}, ),
+            ("thinking/gpt-5-nano", {"max_completion_tokens": 32000,"extra_body":{"reasoning_effort": "high",}}, ),
         ]
 
         for model_info in openai_models:
@@ -193,16 +193,17 @@ class LLMRegistry:
             else:
                 model = model_info
                 config = {}
-                
+
             key = f"openai/{model}"
             self._registry[key] = (OpenAIClient, {"model": model, **config})
 
     def _register_gemini_models(self): # Add this new method
         """Register predefined Google Gemini models."""
         gemini_models = [
-            ("gemini-pro", {"temperature": 0.7, "max_tokens": 4096, "top_k": 32}),
-            ("gemini-1.5-pro-latest", {"temperature": 0.7, "max_tokens": 8192, "top_k": 32}),
-            ("gemini-1.5-flash-latest", {"temperature": 0.7, "max_tokens": 8192, "top_k": 32}),
+            ("gemini-2.5-pro", {}),
+            ("gemini-2.5-flash", {}),
+            ("thinking/gemini-2.5-pro", {"thinking_config":{"thinking_budget":10000,"include_thoughts":False}}),
+            ("thinking/gemini-2.5-flash", {"thinking_config":{"thinking_budget":10000,"include_thoughts":False}}),
         ]
 
         for model_info in gemini_models:
@@ -211,7 +212,7 @@ class LLMRegistry:
             else:
                 model = model_info
                 config = {}
-                
+
             key = f"gemini/{model}"
             self._registry[key] = (GeminiClient, {"model": model, **config})
 
