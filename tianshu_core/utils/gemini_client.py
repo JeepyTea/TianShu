@@ -27,10 +27,10 @@ class GeminiClient(BaseHttpLLMClient):
                     'base_url': (Optional) The API endpoint URL (defaults to Google Gemini API endpoint).
                     'timeout': (Optional) Request timeout in seconds (default: 360).
                     'headers': (Optional) Additional custom headers dictionary.
-                    'temperature': (Optional) Temperature setting for the model (default: 0.7).
-                    'max_tokens': (Optional) Maximum number of tokens to generate (default: 4096).
+                    'temperature': (Optional) Temperature setting for the model.
+                    'max_tokens': (Optional) Maximum number of tokens to generate.
                     'top_p': (Optional) Top-p sampling parameter (default: 1.0).
-                    'top_k': (Optional) Top-k sampling parameter (default: 32).
+                    'top_k': (Optional) Top-k sampling parameter.
                     'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
         # Prioritize config value, then env var, then default for base_url
@@ -44,10 +44,7 @@ class GeminiClient(BaseHttpLLMClient):
         local_config.setdefault("timeout", self.DEFAULT_TIMEOUT)
 
         # Set default generation parameters
-        local_config.setdefault("temperature", 0.7)
-        local_config.setdefault("max_tokens", 4096)  # Maps to maxOutputTokens
         local_config.setdefault("top_p", 1.0)
-        local_config.setdefault("top_k", 32)  # Specific to Gemini
 
         # Store extra_body if provided in config
         self.extra_body = local_config.pop("extra_body", None)
@@ -173,14 +170,17 @@ class GeminiClient(BaseHttpLLMClient):
         if api_model_name.startswith("thinking/"):
             api_model_name = api_model_name.replace("thinking/", "", 1) # Remove only the first occurrence
 
+        generation_config_with_none = {
+            "temperature": kwargs.get("temperature", self.temperature),
+            "maxOutputTokens": kwargs.get("max_tokens", self.max_output_tokens),
+            "topP": kwargs.get("top_p", self.top_p),
+            "topK": kwargs.get("top_k", self.top_k),
+        }
+        generation_config = {k: v for k, v in generation_config_with_none.items() if v is not None}
+
         gemini_params = {
             "contents": gemini_formatted_messages,
-            "generationConfig": {
-                "temperature": kwargs.get("temperature", self.temperature),
-                "maxOutputTokens": kwargs.get("max_tokens", self.max_output_tokens),
-                "topP": kwargs.get("top_p", self.top_p),
-                "topK": kwargs.get("top_k", self.top_k),
-            },
+            "generationConfig": generation_config,
         }
 
         # Add extra_body from instance attribute if it exists
