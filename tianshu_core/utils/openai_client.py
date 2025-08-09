@@ -33,6 +33,7 @@ class OpenAIClient(BaseHttpLLMClient):
                     'frequency_penalty': (Optional) Frequency penalty (default: 0.0).
                     'presence_penalty': (Optional) Presence penalty (default: 0.0).
                     'response_format': (Optional) Dictionary for response format, e.g., {"type": "json_object"}.
+                    'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
         # Prioritize config value, then env var, then default for base_url
         local_config.setdefault(
@@ -51,8 +52,9 @@ class OpenAIClient(BaseHttpLLMClient):
         local_config.setdefault("frequency_penalty", 0.0)
         local_config.setdefault("presence_penalty", 0.0)
         
-        # Store response_format if provided in config
+        # Store response_format and extra_body if provided in config
         self.response_format = local_config.pop("response_format", None)
+        self.extra_body = local_config.pop("extra_body", None)
 
         super().__init__(local_config)
 
@@ -134,9 +136,15 @@ class OpenAIClient(BaseHttpLLMClient):
             requests.exceptions.RequestException: If the HTTP request fails after all retries.
             ValueError: If the response format is unexpected or configuration is invalid.
         """
+        # Strip "thinking/" prefix from the model name if present
+        # This handles cases where the model identifier itself includes the "thinking/" prefix
+        api_model_name = self.model
+        if api_model_name.startswith("thinking/"):
+            api_model_name = api_model_name.replace("thinking/", "", 1) # Remove only the first occurrence
+
         # Prepare the request payload
         openai_params = {
-            "model": self.model,
+            "model": api_model_name,
             "messages": messages,
             # Use configured parameters if not overridden in kwargs
             "temperature": kwargs.get("temperature", self.temperature),
@@ -151,6 +159,10 @@ class OpenAIClient(BaseHttpLLMClient):
         if kwargs.get("response_format", self.response_format):
             openai_params["response_format"] = kwargs.get("response_format", self.response_format)
 
+        # Add extra_body from instance attribute if it exists
+        if self.extra_body:
+            openai_params.update(self.extra_body)
+
         # Add any additional parameters from kwargs that match OpenAI's API
         for key, value in kwargs.items():
             if key not in openai_params and key not in [
@@ -160,6 +172,7 @@ class OpenAIClient(BaseHttpLLMClient):
                 "frequency_penalty",
                 "presence_penalty",
                 "response_format",
+                "extra_body",
             ]:
                 openai_params[key] = value
 
