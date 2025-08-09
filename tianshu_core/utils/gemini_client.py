@@ -165,6 +165,9 @@ class GeminiClient(BaseHttpLLMClient):
             ValueError: If the response format is unexpected or configuration is invalid.
         """
         gemini_formatted_messages = self._convert_messages_to_gemini_format(messages)
+        api_model_name = self.model
+        if api_model_name.startswith("thinking/"):
+            api_model_name = api_model_name.replace("thinking/", "", 1) # Remove only the first occurrence
 
         gemini_params = {
             "contents": gemini_formatted_messages,
@@ -174,13 +177,6 @@ class GeminiClient(BaseHttpLLMClient):
                 "topP": kwargs.get("top_p", self.top_p),
                 "topK": kwargs.get("top_k", self.top_k),
             },
-            # Add safety settings if needed, e.g.:
-            # "safetySettings": [
-            #     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            #     {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            #     {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            #     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            # ]
         }
 
         # Add any additional parameters from kwargs that match Gemini's API
@@ -195,7 +191,7 @@ class GeminiClient(BaseHttpLLMClient):
             ]:
                 gemini_params[key] = value
 
-        endpoint = self._get_endpoint(f"models/{self.model}:generateContent")
+        endpoint = self._get_endpoint(f"models/{api_model_name}:generateContent")
         response_data = self._make_http_request(endpoint, gemini_params, num_retries=num_retries)
         return self._extract_response(response_data)
 
