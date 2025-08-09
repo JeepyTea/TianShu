@@ -31,6 +31,7 @@ class GeminiClient(BaseHttpLLMClient):
                     'max_tokens': (Optional) Maximum number of tokens to generate (default: 4096).
                     'top_p': (Optional) Top-p sampling parameter (default: 1.0).
                     'top_k': (Optional) Top-k sampling parameter (default: 32).
+                    'extra_body': (Optional) Dictionary of additional parameters to include in the request body.
         """
         # Prioritize config value, then env var, then default for base_url
         local_config.setdefault(
@@ -47,6 +48,9 @@ class GeminiClient(BaseHttpLLMClient):
         local_config.setdefault("max_tokens", 4096)  # Maps to maxOutputTokens
         local_config.setdefault("top_p", 1.0)
         local_config.setdefault("top_k", 32)  # Specific to Gemini
+
+        # Store extra_body if provided in config
+        self.extra_body = local_config.pop("extra_body", None)
 
         super().__init__(local_config)
 
@@ -178,6 +182,10 @@ class GeminiClient(BaseHttpLLMClient):
                 "topK": kwargs.get("top_k", self.top_k),
             },
         }
+
+        # Add extra_body from instance attribute if it exists
+        if self.extra_body:
+            gemini_params.update(self.extra_body)
 
         # Add any additional parameters from kwargs that match Gemini's API
         # Ensure we don't overwrite parameters already set from defaults or explicit kwargs
