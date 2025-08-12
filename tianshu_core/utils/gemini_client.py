@@ -54,7 +54,7 @@ class GeminiClient(BaseHttpLLMClient):
         self.api_token = self.config.get("api_token")
         self.model = self.config.get("model")
         self.temperature = self.config.get("temperature")
-        self.max_output_tokens = self.config.get("max_tokens")
+        self.max_output_tokens = self.config.get("max_output_tokens")
         self.top_p = self.config.get("top_p")
         self.top_k = self.config.get("top_k")
         self.thinking_config = self.config.get("thinkingConfig")
@@ -174,7 +174,7 @@ class GeminiClient(BaseHttpLLMClient):
 
         generation_config_with_none = {
             "temperature": kwargs.get("temperature", self.temperature),
-            "maxOutputTokens": kwargs.get("max_tokens", self.max_output_tokens),
+            "maxOutputTokens": kwargs.get("max_output_tokens", self.max_output_tokens),
             "topP": kwargs.get("top_p", self.top_p),
             "topK": kwargs.get("top_k", self.top_k),
             "thinkingConfig": kwargs.get("thinking_config", self.thinking_config),
@@ -199,7 +199,7 @@ class GeminiClient(BaseHttpLLMClient):
         for key, value in kwargs.items():
             if key not in gemini_params["generationConfig"] and key not in [
                 "temperature",
-                "max_tokens",
+                "max_output_tokens",
                 "top_p",
                 "top_k",
                 "system_prompt",  # Handled in _convert_messages_to_gemini_format

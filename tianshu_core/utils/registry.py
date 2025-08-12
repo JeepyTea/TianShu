@@ -200,7 +200,7 @@ class LLMRegistry:
     def _register_gemini_models(self): # Add this new method
         """Register predefined Google Gemini models."""
         gemini_models = [
-            ("gemini-2.5-pro", {}),
+            ("gemini-2.5-pro", {"max_output_tokens": 32000}),
             ("gemini-2.5-flash", {}),
             ("thinking/gemini-2.5-pro", {"thinking_config":{"thinking_budget":10000,"include_thoughts":False}}),
             ("thinking/gemini-2.5-flash", {"thinking_config":{"thinking_budget":10000,"include_thoughts":False}}),
